@@ -1,0 +1,1019 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Generator Akun MLBB</title>
+  <script src="https://cdn.tailwindcss.com">
+function cekFullInfo() {
+  const kode = document.getElementById('captchaCode').textContent.trim();
+  const jawaban = document.getElementById('captchaInput').value.trim();
+  if (jawaban !== kode) {
+    alert("Captcha salah. Silakan ketik ulang dengan benar.");
+    return;
+  }
+
+  const btn = document.querySelector('button[onclick="cekFullInfo()"]');
+  const input = document.getElementById('akunFullInput').value.trim().split('\n');
+  const output = document.getElementById('hasilFullInfo');
+  output.innerHTML = '';
+
+  if (btn.disabled) return;
+  if (currentUser.coin < 20) return alert("Coin tidak cukup!");
+
+  currentUser.coin -= 20;
+  const users = loadUsers(); users[currentUsername] = currentUser; saveUsers(users);
+  updateCoinInfo();
+
+  input.forEach(row => {
+    if (!row.includes(':')) return;
+    const [email, pass] = row.split(':');
+    const result = document.createElement('div');
+    result.innerHTML = `
+      <span class="break-words font-bold text-yellow-300">${email}:${pass}</span><br>
+      Nickname: RandomHero<br>
+      Level: ${Math.floor(Math.random() * 100) + 1}<br>
+      Rank: Mythic ${Math.floor(Math.random() * 50)}★<br>
+      Skin: ${Math.floor(Math.random() * 200)}<br>
+      ID: ${Math.floor(Math.random() * 900000000 + 100000000)}<br>Last Login: 2025-06-${String(Math.floor(Math.random() * 28 + 1)).padStart(2, '0')} 18:00:00 WIB
+    `;
+    output.appendChild(result);
+  });
+
+  let cooldown = 30;
+  btn.disabled = true;
+  const origText = btn.textContent;
+  const timer = setInterval(() => {
+    if (cooldown <= 0) { clearInterval(timer); btn.disabled = false; btn.textContent = origText; }
+    else { btn.textContent = `Cooldown ${cooldown--}s`; }
+  }, 1000);
+}
+
+
+function buatCaptchaBaru() {
+  const captcha = Math.random().toString(36).substring(2, 8).toUpperCase();
+  document.getElementById("captchaCode").textContent = captcha;
+}
+
+</script>
+</head>
+<body class="bg-red-700 text-white min-h-screen py-6">
+  <div class="max-w-md mx-auto px-4">
+    <!-- Judul dan Informasi Pengguna -->
+    <h1 class="text-3xl font-bold text-center mb-4">🎮 Generator Akun Dan Checker akun By Alusigma</h1>
+  <div class="bg-white-600 text-sm text-center py-2 px-3 mb-3 rounded shadow">
+    <strong>INFORMASI:</strong> JEDA 30 DETIK AGAR TIDAK EROR — UNTUK FITUR YG LAIN BELI VIP
+  </div>
+    <div id="coinInfo" class="text-center mb-4 text-yellow-300 text-lg">🪙 Coin: -</div>
+
+    <!-- Login/Register -->
+    <div id="authBox" class="bg-red-800 p-6 rounded shadow">
+      <div id="loginForm">
+        <h2 class="text-xl font-bold mb-4 text-center">Login</h2>
+        <input id="loginUser" placeholder="Username" class="w-full p-2 rounded text-black mb-2" />
+        <input id="loginPass" type="password" placeholder="Password" class="w-full p-2 rounded text-black mb-4" />
+        <button id="loginBtn" class="w-full py-2 rounded bg-white text-red-700 font-bold">Login</button>
+        <p id="loginErr" class="mt-2 text-yellow-300 hidden">Username atau password salah</p>
+        <p class="text-sm text-center mt-4">Belum punya akun? <a href="#" id="showRegister" class="underline">Daftar di sini</a></p>
+      </div>
+      <div id="registerForm" class="hidden">
+        <h2 class="text-xl font-bold mb-4 text-center">Register</h2>
+        <input id="regUser" placeholder="Username baru" class="w-full p-2 rounded text-black mb-2" />
+        <input id="regPass" type="password" placeholder="Password" class="w-full p-2 rounded text-black mb-4" />
+        <button id="regBtn" class="w-full py-2 rounded bg-white text-red-700 font-bold">Register</button>
+        <p id="regErr" class="mt-2 text-yellow-300 hidden">Username sudah terdaftar</p>
+        <p id="regSuccess" class="mt-2 text-green-300 hidden">Registrasi berhasil! Silakan login.</p>
+        <p class="text-sm text-center mt-4">Sudah punya akun? <a href="#" id="showLogin" class="underline">Login di sini</a></p>
+      </div>
+    </div>
+
+    <!-- Generator -->
+    <div id="generators" class="space-y-4 hidden mt-6"></div>
+
+    <!-- Checker Akun -->
+    <div class="bg-red-800 p-4 rounded shadow mt-4 hidden" id="checkerContainer">
+      <h2 class="text-xl font-semibold mb-2 text-center">🔍 Checker Akun</h2>
+      <textarea id="akunInput" rows="5" placeholder="email:password\nemail:password" class="w-full p-2 rounded text-black"></textarea>
+      <button onclick="validasiAkun()" class="w-full mt-2 py-2 rounded bg-white text-red-700 font-bold">Cek Validitas (20 coin)</button>
+      <div id="hasilValidasi" class="mt-3 text-sm space-y-1"></div>
+    </div>
+
+    <!-- VIP Box -->
+    <div id="vipBox" class="bg-yellow-600 p-4 rounded shadow mt-4 hidden">  
+<h2 class="text-xl font-semibold mb-2 text-center">👑 VIP Zone</h2>
+      <p class="text-center">Selamat datang VIP! Kamu dapat akses data spesial, fitur premium, atau generator rahasia.</p></div>
+    
+<div id="checkerFullInfo" class="hidden" class="bg-yellow-800 p-4 rounded shadow mt-4">
+  <h2 class="text-xl font-semibold mb-2 text-center">🔍 Checker Full Info</h2>
+  <label class="block mb-1">Masukkan akun:</label>
+  <textarea id="akunFullInput" rows="5" placeholder="email:password" class="w-full p-2 rounded text-black"></textarea>
+  
+  
+  <label class="block mt-3 mb-1">Tulis kode ini: <span id="captchaCode" class="font-bold text-white bg-red-600 px-2 py-1 rounded">ABC123</span></label>
+  <input id="captchaInput" class="w-full p-2 rounded text-black mb-2" placeholder="Ketik kode di atas" />
+  <button onclick="cekFullInfo()" class="w-full mt-2 py-2 rounded bg-white text-yellow-700 font-bold">Cek Info Akun (20 coin)</button>
+  <div id="hasilFullInfo" class="mt-3 text-sm space-y-1"></div>
+</div>
+    
+<!-- Checker Full Info -->
+
+
+  </div>
+
+<script>
+const COOLDOWN = 30;
+const COST_PER_GEN = 1;
+const START_COIN = 100;
+const USERS_KEY = 'mlgen_users';
+let currentUser = null, currentUsername = '';
+
+const accountsSets = [
+  [
+  "vasin.brat2014@yandex.ru:Sergei1996 | Level: 107 | Name: bitka solenlbi | Rank: Mythic (13 stars) | UID: 2264757 (6002) | Registered: 2016-10-09T21:53:34.000Z",
+  "hameslol@gmail.com:Jamespogi100 | Level: 96 | Name: KOLboy. | Country: KR | Rank: Mythic Glory (51 stars) | UID: 445218287 (7013) | Registered: 2019-05-16T08:40:19.000Z",
+  "ilyasnc34@gmail.com:Ilyasnc1 | Level: 107 | Name: J I M I | Rank: Mythic Glory (57 stars) | UID: 239282613 (9248) | Registered: 2018-06-12T11:26:04.000Z",
+  "kevinwinata47@gmail.com:Kevien1234 | Level: 159 | Name: Vienzz | Rank: Mythic Immortal (359 stars) | UID: 48935627 (2080) | Registered: 2017-04-14T15:46:30.000Z",
+  "urenesther84@gmail.com:Love6089 | Level: 114 | Name: Skull84 | Rank: Mythic (23 stars) | UID: 97534882 (2223) | Registered: 2017-09-12T13:14:27.000Z",
+  "victorvcoelho@gmail.com:1Positivo | Level: 112 | Name: Coelho Cósmico | Rank: Mythic (22 stars) | UID: 661316049 (1258) | Registered: 2020-03-23T01:24:55.000Z",
+  "farchanhanif987@gmail.com:Anonymous123 | Level: 116 | Name: FHs_Cupel.08 | Rank: Mythic Glory (57 stars) | UID: 144740789 (2734) | Registered: 2017-12-30T03:19:00.000Z",
+  "hisyamislamic012@gmail.com:Blackshot11 | Level: 122 | Name: ғᴜʀᴏʀᴇ. | Rank: Mythic Glory (52 stars) | UID: 43938625 (2067) | Registered: 2017-03-24T17:15:12.000Z",
+  "prasetyodani95@gmail.com:95Prasetyodani | Level: 163 | Name: Chou LinkedIn | Rank: Mythic Glory (77 stars) | UID: 56230637 (2089) | Registered: 2017-05-12T07:52:14.000Z",
+  "aditiosudirman2@gmail.com:18a04d96iTIO | Level: 109 | Name: Sins | Rank: Mythic Glory (53 stars) | UID: 136809140 (2692) | Registered: 2017-12-15T13:39:18.000Z",
+  "alqammarwan@gmail.com:Azerty123 | Level: 114 | Name: BȺbȺ会ʏȺǥȺ | Rank: Mythic Glory (61 stars) | UID: 1069082758 (6511) | Registered: 2021-09-23T15:13:51.000Z",
+  "mohamad.syahmi0403@gmail.com:Jumaat93 | Level: 109 | Name: Miloz | Rank: Mythic Honor (26 stars) | UID: 55749944 (2092) | Registered: 2017-05-10T11:27:09.000Z",
+  "anthony.jamisola8@gmail.com:1n20H15n25 | Level: 109 | Name: 亗Easley×͜× | Rank: Mythic Glory (64 stars) | UID: 1912209 (1007) | Registered: 2016-10-08T04:53:46.000Z",
+  "rdanisetiawan27@gmail.com:Buatapaan27 | Level: 133 | Name: Matsoon | Rank: Mythic Glory (82 stars) | UID: 55495860 (2094) | Registered: 2017-05-09T12:26:16.000Z",
+  "jhonatansalgueiro2002@gmail.com:Jhonatan123 | Level: 119 | Name: PedyCreed | Rank: Mythic Honor (43 stars) | UID: 512243587 (1225) | Registered: 2019-08-19T18:17:50.000Z",
+  "jazmin.mg00@gmail.com:Mago260199 | Level: 107 | Name: JazminMG♡ | Rank: Mythic Glory (77 stars) | UID: 1143381978 (5356) | Registered: 2021-12-31T02:59:42.000Z",
+  "soifa.attoumani14@gmail.com:Acoua976 | Level: 106 | Name: Pepiteli | Rank: Mythic Honor (41 stars) | UID: 60887540 (6209) | Registered: 2017-05-27T23:47:02.000Z",
+  "yousef.elsouissi@gmail.com:01119889795Jj | Level: 101 | Name: The dominant pharaoh | Rank: Mythic (7 stars) | UID: 587510187 (6078) | Registered: 2019-12-09T22:43:14.000Z",
+  "kleinpaultuazon@gmail.com:Friendyou21 | Level: 102 | Name: 暗|•Zai✔︎ | Rank: Mythic Glory (55 stars) | UID: 553675951 (3459) | Registered: 2019-10-20T08:48:05.000Z",
+  "abdulghofurfajar@gmail.com:Karawang1 | Level: 101 | Name: Montzy | Country: ID | Rank: Mythic Honor (25 stars) | UID: 522491979 (8098) | Registered: 2019-09-03T05:16:03.000Z",
+  "Pichkhmer098765@gmail.com:Pichloveyou12345 | Level: 144 | Name: Crush Baby(^-^) | Country: KH | Rank: Mythic Honor (45 stars) | UID: 336678663 (3664) | Registered: 2018-12-06T09:03:23.000Z",
+  "Aahmaulana62@gmail.com:Sukabumi01 | Level: 165 | Name: Ayom Kesatria Hitam. | Country: ID | Rank: Mythic Glory (89 stars) | UID: 233726563 (9220) | Registered: 2018-06-03T11:41:51.000Z",
+  "apriflatkersm@gmail.com:123456Tys | Level: 158 | Name: Bᴀᴇᴛʜʏ ♡ | Country: ID | Rank: Mythic Glory (78 stars) | UID: 36812550 (2055) | Registered: 2017-02-19T08:54:16.000Z",
+  "asfaizzana03@gmail.com:Zana1020 | Level: 104 | Name: Zero. | Country: MY | Rank: Mythic Honor (46 stars) | UID: 208650888 (2251) | Registered: 2018-04-21T02:08:45.000Z",
+  "budicoppyireng81@gmail.com:Qwerty0 | Level: 133 | Name: BUDI IRENG | Country: ID | Rank: Mythic Honor (38 stars) | UID: 79002182 (2151) | Registered: 2017-07-20T17:48:39.000Z",
+  "danisha.noviera@gmail.com:Thara2212 | Level: 105 | Name: Kenshirò. | Country: ID | Rank: Mythic Glory (50 stars) | UID: 103923254 (2534) | Registered: 2017-09-29T02:11:25.000Z",
+  "ahmadkax@gmail.com:Raka1711198 | Level: 137 | Name: Kayre | Country: ID | Rank: Mythic Glory (71 stars) | UID: 44229633 (2062) | Registered: 2017-03-26T00:15:59.000Z",
+  "esabiusyoslius@gmail.com:Biusalu001 | Level: 139 | Name: Nick_Carter | Country: ID | Rank: Mythic (9 stars) | UID: 201097718 (9062) | Registered: 2018-04-07T20:44:02.000Z",
+  "franklinvaldez1986@gmail.com:Fcv04081986 | Level: 133 | Name: Frqnz | Country: PH | Rank: Mythic Immortal (137 stars) | UID: 45875192 (3060) | Registered: 2017-04-02T05:40:01.000Z",
+  "ghianladislao2@gmail.com:Dota4ever | Level: 117 | Name: Phantom Greed | Country: PH | Rank: Mythic Glory (83 stars) | UID: 508972092 (3366) | Registered: 2019-08-14T22:01:34.000Z",
+  "irfanjindi.20@gmail.com:IrfanJindi20 | Level: 113 | Name: ¥IJ_Tian.Lui20 | Country: ID | Rank: Mythic Glory (57 stars) | UID: 82370843 (2160) | Registered: 2017-07-30T14:57:47.000Z",
+  "ikhi.dmg07@gmail.com:Ikhi090997 | Level: 111 | Name: M I D O R I Y A | Country: ID | Rank: Mythic Honor (46 stars) | UID: 127541715 (2633) | Registered: 2017-11-26T13:30:34.000Z",
+  "ilhamtampanrpl2@gmail.com:Ilham011011100 | Level: 106 | Name: W H Y .? | Country: ID | Rank: Mythic Glory (68 stars) | UID: 131991486 (2658) | Registered: 2017-12-05T23:00:19.000Z",
+  "iwanpra3@gmail.com:Civilwar3008 | Level: 109 | Name: P R I M E | Country: ID | Rank: Mythic Honor (25 stars) | UID: 81475726 (2155) | Registered: 2017-07-28T07:12:05.000Z",
+  "jintusharma21@gmail.com:Capricorn25 | Level: 123 | Name: Zintu | Country: IN | Rank: Mythic Honor (44 stars) | UID: 97882963 (2505) | Registered: 2017-09-12T06:02:46.000Z",
+  "jimszxturu@gmail.com:Farel1103 | Level: 106 | Name: Sanksッ | Country: ID | Rank: Mythic (18 stars) | UID: 18427494 (2022) | Registered: 2016-12-11T10:29:28.000Z",
+  "josetpasia@gmail.com:Shikma34 | Level: 103 | Name: Mr. Clutch. | Country: PH | Rank: Mythic Glory (50 stars) | UID: 106166776 (3224) | Registered: 2017-10-04T17:25:46.000Z",
+  "mkgabrillo@gmail.com:Gabrillo13 | Level: 102 | Name: MKG29 | Country: PH | Rank: Mythic (19 stars) | UID: 260242244 (3551) | Registered: 2018-07-18T21:03:43.000Z",
+  "mfikrifariz@gmail.com:Fikrigtg234 | Level: 119 | Name: вen10хnĸ×вndoт | Country: ID | Rank: Mythic Glory (75 stars) | UID: 45456184 (2073) | Registered: 2017-03-31T14:14:37.000Z",
+  "levixhunter01234@gmail.com:Mark200319 | Level: 145 | Name: Maaaark.... | Country: PH | Rank: Mythic Glory (68 stars) | UID: 168352972 (3174) | Registered: 2018-02-10T10:06:47.000Z",
+  "markovaloveli@gmail.com:Qwe098765 | Level: 106 | Name: tendagan macan | Country: ID | Rank: Mythic Immortal (99 stars) | UID: 225993519 (9166) | Registered: 2018-05-21T07:17:38.000Z",
+  "lybuth944@gmail.com:Buth168kh | Level: 117 | Name: Hashira. | Country: VN | Rank: Mythic Immortal (135 stars) | UID: 525063766 (3393) | Registered: 2019-09-07T00:30:42.000Z",
+  "muhammadiqul2@gmail.com:Mautauaja12 | Level: 128 | Name: Xyro. | Country: ID | Rank: Mythic Glory (72 stars) | UID: 112418289 (2232) | Registered: 2017-10-21T04:04:44.000Z",
+  "nareachkhmer1jivit1234@gmail.com:Lovemobi1122 | Level: 125 | Name: Nāng The King | Country: KH | Rank: Mythic Glory (60 stars) | UID: 660023724 (10221) | Registered: 2020-03-21T08:26:44.000Z",
+  "noscript404@gmail.com:Nangkadua2 | Level: 127 | Name: iyan@2 | Country: ID | Rank: Mythic Glory (50 stars) | UID: 169247896 (2868) | Registered: 2018-02-11T15:50:51.000Z",
+  "rafialghifahri0606@gmail.com:Alghi0605 | Level: 102 | Name: R A F | Country: ID | Rank: Mythic Glory (50 stars) | UID: 773569309 (12098) | Registered: 2020-08-13T13:35:59.000Z",
+  "pretty000666@gmail.com:Bandung2010 | Level: 108 | Name: Awinnardie. | Country: ID | Rank: Mythic Glory (58 stars) | UID: 284386278 (9484) | Registered: 2018-09-02T13:29:03.000Z",
+  "rrazez0@gmail.com:Fikri0509 | Level: 113 | Name: RAZEZO_12 | Country: ID | Rank: Mythic Glory (55 stars) | UID: 347544167 (9435) | Registered: 2018-12-23T03:38:38.000Z",
+  "rachel.yusuf1@gmail.com:Ayahendot1 | Level: 140 | Name: RACHELLL | Country: ID | Rank: Mythic Glory (64 stars) | UID: 33022482 (2047) | Registered: 2017-02-01T12:47:39.000Z",
+  "s97358824@gmail.com:Bojongsari123 | Level: 106 | Name: Narso junior | Country: ID | Rank: Mythic Honor (30 stars) | UID: 629999716 (8524) | Registered: 2020-02-07T02:44:52.000Z",
+  "sssiapagueee@gmail.com:Kiki234 | Level: 115 | Name: Kiskeyy23 | Country: ID | Rank: Mythic Honor (47 stars) | UID: 85976736 (2169) | Registered: 2017-08-10T13:09:39.000Z",
+  "tekuwiti357@nunwe.com:Cacad123 | Level: 123 | Name: KaiNorui | Country: ID | Rank: Mythic Honor (40 stars) | UID: 143886758 (2721) | Registered: 2017-12-28T12:39:07.000Z",
+  "valendeandra@gmail.com:123456789Qwerty | Level: 149 | Name: fall? | Country: ID | Rank: Mythic Glory (59 stars) | UID: 118879534 (2606) | Registered: 2017-11-06T14:52:55.000Z",
+  "surursaja66@gmail.com:Rahman18 | Level: 156 | Name: — Dé R¡én | Country: ID | Rank: Mythic Glory (51 stars) | UID: 238202855 (9244) | Registered: 2018-06-10T18:28:02.000Z",
+  "zentax18@gmail.com:Johnapple10 | Level: 103 | Name: Smίɭe | Country: PH | Rank: Mythic Honor (49 stars) | UID: 409549637 (3859) | Registered: 2019-03-25T04:40:44.000Z",
+  "zoomboy12254@gmail.com:Melvert007 | Level: 149 | Name: ZoomBoy | Country: IN | Rank: Mythic Glory (51 stars) | UID: 44136746 (2073) | Registered: 2017-03-25T13:33:21.000Z",
+  "zaido_rangers@yahoo.com:Justinjohnantolin09080620000 | Level: 103 | Name: Lᴜᴄᴋʏシ︎ | Country: US | Rank: Mythic Glory (52 stars) | UID: 28222389 (5009) | Registered: 2017-01-11T09:08:12.000Z",
+  "nh77726@gmail.com:Utakatikweb575 | Level: 136 | Name: LegendDayz | Rank: Mythic Immortal (56 stars) | UID: 168935884 (2860) | Registered: 2018-02-11T06:43:55.000Z",
+  "pangerancyber87@gmail.com:Rizki1234 | Level: 136 | Name: piud d leviathàn. | Rank: Mythic Honor (49 stars) | UID: 149132445 (2742) | Registered: 2018-01-07T01:58:53.000Z",
+  "syarifh998@gmail.com:Syarif1927 | Level: 125 | Name: crown | Rank: Mythic Honor (30 stars) | UID: 556997857 (8223) | Registered: 2019-10-25T23:07:42.000Z",
+  "novericorico@gmail.com:akucintaAllahSWT0 | Level: 105 | Name: Alicization | Country: ID | Rank: Mythic Immortal (100 stars) | UID: 30705532 (2042) | Registered: 2017-01-22T15:55:33.000Z",
+  "khryztofher@gmail.com:Chr1st0ph3r | Level: 121 | Name: xysressas | Country: ph | Rank: Mythic Honor (46 stars) | UID: 1892857 (1006) | Registered: 2016-10-08T01:32:08.000Z",
+  "anazmarf@gmail.com:Mongoose17 | Level: 103 | Name: Hann BIASALAH. | Country: ID | Rank: Mythic Glory (52 stars) | UID: 45230884 (2211) | Registered: 2017-03-30T14:49:02.000Z",
+  "paulopaniagua38@gmail.com:June1518 | Level: 110 | Name: Stranger | Country: PH | Rank: Mythic Honor (46 stars) | UID: 45612166 (3060) | Registered: 2017-04-01T07:00:35.000Z",
+  "rabillahtobing@gmail.com:Tobing30 | Level: 109 | Name: Micin Boy M.Si | Country: ID | Rank: Mythic (19 stars) | UID: 121032726 (2611) | Registered: 2017-11-12T04:08:21.000Z",
+  "deepagurung996@gmail.com:Smrity2627 | Level: 122 | Name: ωяαтн_怒 | Country: NP | Rank: Mythic Honor (43 stars) | UID: 529834107 (4232) | Registered: 2019-09-14T02:33:47.000Z",
+  "chilitojhonsebastian2002@gmail.com:Sebas03092002 | Level: 107 | Name: 神 A R R O G A N T | Country: CO | Rank: Mythic Glory (53 stars) | UID: 77033938 (5008) | Registered: 2017-07-14T19:16:50.000Z",
+  "lalito.com.mx@gmail.com:Lalito2007 | Level: 116 | Name: Lalitosya | Country: MX | Rank: Mythic Glory (51 stars) | UID: 290910197 (5045) | Registered: 2018-09-15T00:27:04.000Z",
+  "idhamdarmawan04@gmail.com:Idham12345 | Level: 108 | Name: Dammm. | Country: ID | Rank: Mythic Honor (35 stars) | UID: 35400297 (2056) | Registered: 2017-02-12T14:29:05.000Z",
+  "yudhan.surya22@gmail.com:Yudhan12345678 | Level: 116 | Name: MONARCH | Country: ID | Rank: Mythic Honor (44 stars) | UID: 325655149 (9109) | Registered: 2018-11-18T09:23:27.000Z",
+  "emaawaal@gmail.com:Wer36050299 | Level: 149 | Name: Ṩ๏ϻnͣiͫα☄ | Country: AR | Rank: Mythic Glory (53 stars) | UID: 178017499 (1045) | Registered: 2018-02-27T07:19:47.000Z",
+  "s_p_i_d_e_r_2006@yahoo.com:jErome2011 | Level: 105 | Name: ⭐SpyThere | Country: PH | Rank: Mythic (19 stars) | UID: 99320945 (3107) | Registered: 2017-09-16T07:14:47.000Z",
+  "kadiryalcinkaya@hotmail.com:Arya2302 | Level: 138 | Name: SoulEvil | Country: TR | Rank: Mythic Honor (40 stars) | UID: 17983985 (4011) | Registered: 2016-12-10T08:07:25.000Z",
+  "abhinabhpradhan77@gmail.com:Holidays2015 | Level: 116 | Name: PΔIN | Country: IN | Rank: Mythic Glory (52 stars) | UID: 183622538 (2957) | Registered: 2018-03-09T08:31:24.000Z",
+  "yhugan76@gmail.com:Mhh1390c | Level: 104 | Name: Not yer fussykat | Country: PH | Rank: Mythic Honor (49 stars) | UID: 186682819 (3185) | Registered: 2018-03-14T12:46:15.000Z",
+  "Dhikayap22@gmail.com:Andhikapratama22 | Level: 150 | Name: 'D' e 'J' a 'V' u | Rank: Mythic Immortal (52 stars) | UID: 195669076 (2998) | Registered: 2018-03-29T21:18:24.000Z",
+  "syemben08@gmail.com:Sambai0810 | Level: 109 | Name: Halcyon | Rank: Mythic Honor (34 stars) | UID: 185839493 (2953) | Registered: 2018-03-13T00:36:16.000Z",
+  "annapaula777777@gmail.com:Italoeanna2020 | Level: 114 | Name: Jigsαwϟ | Rank: Mythic Honor (33 stars) | UID: 99948353 (1034) | Registered: 2017-09-17T15:29:36.000Z",
+  "choirudinbahroni@gmail.com:Udinoye07 | Level: 117 | Name: 😘 | Rank: Mythic (16 stars) | UID: 465891987 (2378) | Registered: 2019-06-13T06:55:53.000Z",
+  "sekenoseven@gmail.com:Risya2612 | Level: 118 | Name: pakyu | Rank: Mythic (19 stars) | UID: 945879734 (12755) | Registered: 2021-04-11T12:31:43.000Z",
+  "istiicen@gmail.com:Odading1 | Level: 127 | Name: MhmmdAshari | Rank: Mythic Immortal (53 stars) | UID: 315456990 (9648) | Registered: 2018-11-01T03:46:15.000Z",
+  "ndra.waee@gmail.com:Wijayaa30 | Level: 106 | Name: Ndra Waee | Rank: Mythic Honor (25 stars) | UID: 71538897 (2132) | Registered: 2017-06-29T07:35:03.000Z",
+  "Kroadh@gmail.com:Aarin1470 | Level: 137 | Name: weirdo | Rank: Mythic Honor (39 stars) | UID: 409920119 (9900) | Registered: 2019-03-25T14:41:21.000Z",
+  "yudhypratama69@gmail.com:Yudhy231010 | Level: 139 | Name: TiaaVEJU | Rank: Mythic Immortal (53 stars) | UID: 278154326 (9459) | Registered: 2018-08-21T23:04:23.000Z",
+  "nheytattoo@gmail.com:NHEYbernal123 | Level: 105 | Name: aNniEmHey_o9!! | Rank: Mythic Immortal (56 stars) | UID: 500441318 (3327) | Registered: 2019-08-02T09:58:21.000Z",
+  "amz.zeal@gmail.com:Hamsa1312 | Level: 126 | Name: Djati Bos | Rank: Mythic (10 stars) | UID: 74552251 (2137) | Registered: 2017-07-07T15:28:58.000Z",
+  "beverlylacsarom@gmail.com:Nikkolucas21 | Level: 101 | Name: 😁iRincaBevz😁 | Rank: Legend II | UID: 590496170 (10050) | Registered: 2019-12-14T03:33:31.000Z",
+  "odinsama60@gmail.com:Tegar4646 | Level: 146 | Name: O D I N | Rank: Mythic Immortal (63 stars) | UID: 34029983 (2051) | Registered: 2017-02-06T06:55:54.000Z",
+  "yandipermadi24@gmail.com:Yandi060696 | Level: 113 | Name: Lɪᴇᴍꜱ | YP™ | Rank: Mythic Immortal (51 stars) | UID: 103955534 (2528) | Registered: 2017-09-29T04:29:23.000Z",
+  "mikojerrllanera@gmail.com:Mikojerr9423686 | Level: 109 | Name: ʍɨӄօʝɛʀʀ | Rank: Mythic Immortal (67 stars) | UID: 225815248 (3514) | Registered: 2018-05-20T23:21:15.000Z",
+  "hammamgonjil@gmail.com:Hammamgonjil777 | Level: 101 | Name: G O N J I L | Rank: Mythic Immortal (59 stars) | UID: 182893057 (2941) | Registered: 2018-03-08T01:28:10.000Z",
+  "fadzlimit@gmail.com:Falkon123 | Level: 116 | Name: X-SPECTRE-X | Rank: Mythic Immortal (58 stars) | UID: 200210462 (2250) | Registered: 2018-04-06T11:56:55.000Z",
+  "m.antonfebriansyah@gmail.com:02February94 | Level: 148 | Name: ANTON69 | Rank: Mythic Honor (49 stars) | UID: 536738747 (8151) | Registered: 2019-09-24T02:13:10.000Z",
+  "fkurt57@gmail.com:AS15393240df | Level: 108 | Name: Minoset+ | Rank: Mythic (23 stars) | UID: 644650199 (4204) | Registered: 2020-02-29T02:00:37.000Z",
+  "KidingTara@gmail.com:T98629900a | Level: 106 | Name: ꧁JᎯℕᎯ꧂ | Rank: Mythic (18 stars) | UID: 247902554 (9308) | Registered: 2018-06-26T12:20:33.000Z",
+  "teguhpukon24@gmail.com:Teguhpukon24 | Level: 130 | Name: X-TP | Rank: Mythic Immortal (58 stars) | UID: 219717510 (9157) | Registered: 2018-05-10T11:58:20.000Z",
+  "craftytfree@gmail.com:NazilRezi05 | Level: 113 | Name: Kyy chevalier. | Rank: Mythic Immortal (59 stars) | UID: 153029930 (2768) | Registered: 2018-01-14T03:35:05.000Z",
+  "vincenisrinecabaluna@gmail.com:Janacua09 | Level: 106 | Name: :-) gARita (-: | Rank: Mythic Immortal (51 stars) | UID: 852633895 (10619) | Registered: 2020-11-27T23:11:47.000Z",
+  "aldifixmoro267@gmail.com:Topeng51 | Level: 131 | Name: queen ent** | Rank: Mythic Immortal (82 stars) | UID: 141499980 (2717) | Registered: 2017-12-24T07:25:58.000Z",
+  "okutil41@gmail.com:Apakah123 | Level: 120 | Name: cakuraw | Rank: Mythic Immortal (71 stars) | UID: 68690526 (2121) | Registered: 2017-06-20T22:13:39.000Z",
+  "saderuzkin23@gmail.com:Wildanjamil23 | Level: 109 | Name: TrustB1tch_ | Rank: Mythic Honor (29 stars) | UID: 222031737 (9157) | Registered: 2018-05-15T05:42:50.000Z",
+  "aqilrizal66@gmail.com:aQilRizal100327 | Level: 103 | Name: Super Hòlly. | Rank: Mythic Immortal (55 stars) | UID: 57421013 (2092) | Registered: 2017-05-16T11:43:29.000Z",
+  "akunlesly2022@gmail.com:Arda2024 | Level: 135 | Name: Jumat • Legi | Rank: Mythic Honor (31 stars) | UID: 88959444 (2180) | Registered: 2017-08-18T22:07:47.000Z",
+  "cesarrichardgutierrez01@gmail.com:Richardboang0 | Level: 102 | Name: Denji. | Rank: Mythic (20 stars) | UID: 136309166 (3137) | Registered: 2017-12-14T13:34:44.000Z",
+  "nugrahaagung426@gmail.com:Nugraha18 | Level: 147 | Name: Kyo. | Rank: Mythic Honor (30 stars) | UID: 174563896 (2884) | Registered: 2018-02-21T02:42:49.000Z",
+  "kengchanrith078@gmail.com:Rith2003 | Level: 137 | Name: Luffy | Rank: Mythic Immortal (52 stars) | UID: 179265301 (3172) | Registered: 2018-03-01T14:11:57.000Z",
+  "fajarmuhaikal12@gmail.com:Avcisi2001 | Level: 143 | Name: Bellemere | Rank: Mythic Immortal (99 stars) | UID: 87317914 (2172) | Registered: 2017-08-14T04:47:06.000Z",
+  "14jovys@gmail.com:Ammeee140506 | Level: 99 | Name: ammeee | Rank: Mythic Immortal (55 stars) | UID: 694777229 (8769) | Registered: 2020-05-06T05:30:17.000Z",
+  "arifin6184@gmail.com:Medan2020 | Level: 92 | Name: FINNMODEXY. | Rank: Mythic Honor (31 stars) | UID: 47102507 (2076) | Registered: 2017-04-07T10:11:45.000Z",
+  "Appleaung2017@gmail.com:Coker2000 | Level: 95 | Name: Ig:@Khinoyskyzhi | Rank: Mythic (11 stars) | UID: 106361575 (2545) | Registered: 2017-10-05T09:28:17.000Z",
+  "kddom11@gmail.com:kIaradom12 | Level: 98 | Name: Princé Kyfann. | Rank: Mythic Honor (45 stars) | UID: 131218092 (2662) | Registered: 2017-12-04T06:11:45.000Z",
+  "glennreyespalmaria@gmail.com:Glennpalmaria04 | Level: 100 | Name: ÷NečroMančer÷ | Rank: Legend IV | UID: 466887927 (3253) | Registered: 2019-06-14T14:14:17.000Z",
+  "tioap170996@gmail.com:Tap17091996 | Level: 96 | Name: keought | Rank: Mythic (18 stars) | UID: 71593274 (2130) | Registered: 2017-06-29T10:46:38.000Z",
+  "gabrielmisaros20@gmail.com:Rahasiad0ng | Level: 90 | Name: ngabriel | Rank: Mythic (24 stars) | UID: 608877679 (8425) | Registered: 2020-01-06T15:10:39.000Z",
+  "dathantara18@gmail.com:Dathan180302 | Level: 100 | Name: dathan.02 | Rank: Mythic Immortal (63 stars) | UID: 81883338 (2154) | Registered: 2017-07-29T10:12:28.000Z",
+  "geofanno710@gmail.com:Geo08052001 | Level: 96 | Name: M•Gusion-Al•Fann | Rank: Mythic Immortal (61 stars) | UID: 423475581 (9971) | Registered: 2019-04-14T13:13:07.000Z",
+  "sivchhing660@gmail.com:Myphone56 | Level: 94 | Name: Xu Ting | Rank: Mythic Honor (49 stars) | UID: 757075407 (5254) | Registered: 2020-07-22T06:24:41.000Z",
+  "isaiahthegreat0521@gmail.com:Doyddy69 | Level: 92 | Name: ☪ Gélynnn. | Rank: Mythic (24 stars) | UID: 391748165 (3801) | Registered: 2019-02-26T13:42:41.000Z",
+  "starsbuzz291103@gmail.com:Alquran291103 | Level: 99 | Name: AkangAbin. | Rank: Mythic Immortal (54 stars) | UID: 193004945 (9015) | Registered: 2018-03-25T05:22:28.000Z",
+  "plongop65@gmail.com:Fandi070509 | Level: 96 | Name: Portgas D Ilhamm. | Rank: Mythic (13 stars) | UID: 341477988 (3659) | Registered: 2018-12-13T22:21:04.000Z",
+  "sahirulmuztapa@gmail.com:Azdiani92 | Level: 98 | Name: JEJEMON | Rank: Mythic (24 stars) | UID: 8494998 (2009) | Registered: 2016-11-09T04:46:52.000Z",
+  "fattahurriza@gmail.com:Alfatta17 | Level: 92 | Name: SkinnyCalm | Rank: Mythic Honor (25 stars) | UID: 102573291 (2531) | Registered: 2017-09-24T21:48:45.000Z",
+  "dianneyumang001@gmail.com:5669Adyv | Level: 93 | Name: dayanggg | Country: PH | Rank: Mythic Honor (43 stars) | UID: 285730366 (3578) | Registered: 2018-09-05T10:32:08.000Z",
+  "jocs.jilt@yahoo.com.ph:Secret213 | Level: 97 | Name: Jocs | Country: PH | Rank: Mythic Honor (42 stars) | UID: 180295294 (3174) | Registered: 2018-03-03T10:11:26.000Z",
+  "fajar301095@gmail.com:Rehan2008 | Level: 98 | Name: SANCTUARY | Country: ID | Rank: Mythic Honor (46 stars) | UID: 42323611 (2065) | Registered: 2017-03-17T06:38:25.000Z",
+  "julkimarzuki10@gmail.com:Marzuki97 | Level: 126 | Name: FieYas | Country: MY | Rank: Mythic Honor (45 stars) | UID: 518162928 (8071) | Registered: 2019-08-28T13:05:03.000Z",
+  "rnhidayat2@gmail.com:Cuc4kr0w0 | Level: 126 | Name: AERO | Country: ID | Rank: Mythic Honor (32 stars) | UID: 129812462 (2653) | Registered: 2017-12-01T12:39:55.000Z",
+  "brix.augusto025@gmail.com:Ohyeah25 | Level: 106 | Name: ĸeιgoтaĸaмι | Country: PH | Rank: Mythic Honor (30 stars) | UID: 300689997 (3604) | Registered: 2018-10-04T05:59:01.000Z",
+  "bmutaqien@gmail.com:Bandung12 | Level: 105 | Name: BRemms×Why. | Country: ID | Rank: Mythic Honor (36 stars) | UID: 66993179 (2116) | Registered: 2017-06-15T18:09:17.000Z",
+  "xoxolovecheese24@yahoo.com:March271998 | Level: 105 | Name: KorzA✓ | Country: PH | Rank: Mythic (10 stars) | UID: 427391146 (3902) | Registered: 2019-04-20T08:15:46.000Z",
+  "josephsamonte1977@gmail.com:051601jJ | Level: 122 | Name: Lalabs_28 | Country: us | Rank: Legend II | UID: 4931076 (2005) | Registered: 2016-10-24T10:43:14.000Z",
+  "Mukminhaber@gmail.com:Mukmin061217 | Level: 143 | Name: BER4•MINS♡♧ | Country: ID | Rank: Mythic Honor (36 stars) | UID: 150251696 (2748) | Registered: 2018-01-09T05:24:39.000Z",
+  "sereytevintheng@gmail.com:Tevin616120 | Level: 108 | Name: TomJerry | Country: VN | Rank: Mythic Honor (29 stars) | UID: 376967170 (3759) | Registered: 2019-02-04T10:17:11.000Z",
+  "jonatalbangunsitanggang08@gmail.com:YamadaKun18 | Level: 124 | Name: JbsZen | Country: ID | Rank: Mythic Honor (49 stars) | UID: 153372868 (2773) | Registered: 2018-01-14T11:44:20.000Z",
+  "marlondimalanta2017@gmail.com:Liam2o17 | Level: 104 | Name: ░i░d░o░l░ | Country: PH | Rank: Mythic (23 stars) | UID: 73926136 (3019) | Registered: 2017-07-05T23:40:16.000Z",
+  "ahmadsahalmukfi@gmail.com:Sahal657 | Level: 115 | Name: •|ᴘᴀɪɴシ︎ | Country: PH | Rank: Mythic Honor (49 stars) | UID: 367631062 (3739) | Registered: 2019-01-20T22:47:27.000Z",
+  "ty.bouna3a07@gmail.com:Lyyang168 | Level: 141 | Name: Fuuyark | Country: KH | Rank: Legend I | UID: 37199023 (3208) | Registered: 2017-02-21T05:47:42.000Z",
+  "thomasjoker2358@gmail.com:Ahphyu2358 | Level: 143 | Name: Ďïvęŕğèñţ | Country: US | Rank: Mythic Glory (60 stars) | UID: 275084732 (5043) | Registered: 2018-08-16T10:06:23.000Z",
+  "198.ask@gmail.com:SidYei198007 | Level: 182 | Name: *YT:eSportsSL | Country: SL | Rank: Mythic Immortal (99 stars) | UID: 416087356 (4203) | Registered: 2019-04-03T22:19:57.000Z",
+  "gavilanileonardo@gmail.com:L3o12345 | Level: 107 | Name: The_Kawaii..boss ;3 | Country: AR | Rank: Mythic (12 stars) | UID: 577728389 (1241) | Registered: 2019-11-25T17:05:54.000Z",
+  "ananda30pron@gmail.com:Sesuaikan30 | Level: 107 | Name: •Dira??• | Country: ID | Rank: Mythic Glory (82 stars) | UID: 587991581 (8356) | Registered: 2019-12-10T13:23:23.000Z",
+  "amsyahrudisandy@gmail.com:347ubuzZ | Level: 104 | Name: GingerBread | Country: ID | Rank: Mythic Honor (36 stars) | UID: 217023256 (9120) | Registered: 2018-05-05T15:44:06.000Z",
+  "raflyyisfandyarr@gmail.com:Kontol123 | Level: 108 | Name: Leviathann | Country: ID | Rank: Mythic Glory (73 stars) | UID: 171611169 (2883) | Registered: 2018-02-16T03:26:35.000Z",
+  "rafaianwar55@gmail.com:NoraAdillah2016 | Level: 114 | Name: KOMUA | Country: ID | Rank: Mythic Honor (25 stars) | UID: 1000751929 (12986) | Registered: 2021-06-22T09:19:40.000Z",
+  "jakjakobmrltua@gmail.com:KelapaMuda9088 | Level: 149 | Name: JakobSitompul | Country: ID | Rank: Mythic Glory (53 stars) | UID: 49041655 (2081) | Registered: 2017-04-15T04:20:01.000Z",
+  "rafifzuhdik12@gmail.com:Rafif123 | Level: 101 | Name: [셜록]•RobberBob | Country: ID | Rank: Mythic Honor (47 stars) | UID: 172716555 (2892) | Registered: 2018-02-17T16:00:31.000Z",
+  "jakeskiefermin@gmail.com:Bobo333 | Level: 91 | Name: Aries | Country: PH | Rank: Mythic Honor (27 stars) | UID: 810554008 (10537) | Registered: 2020-09-30T00:52:48.000Z",
+  "sathyawages@gmail.com:Sathya2001 | Level: 98 | Name: L u o  Z h e n g | Rank: Mythic Glory (51 stars) | UID: 26723696 (2036) | Registered: 2017-01-05T22:46:57.000Z",
+  "arya.riandika@gmail.com:Arya1933krn | Level: 97 | Name: ᴠɪɴᴄᴇɴᴢo | Rank: Mythic Glory (57 stars) | UID: 103469883 (2525) | Registered: 2017-09-27T15:02:59.000Z",
+  "raffaellantang05@gmail.com:Alessandro99078 | Level: 99 | Name: V a l k y r i e 火 | Rank: Mythic Honor (41 stars) | UID: 121125289 (2613) | Registered: 2017-11-12T07:41:15.000Z",
+  "nalaart09@gmail.com:Kamila0908 | Level: 92 | Name: MUSUH'E PAK EKO | Rank: Mythic Honor (42 stars) | UID: 64992492 (2111) | Registered: 2017-06-09T13:12:26.000Z",
+  "adearifin596@gmail.com:Ade1997 | Level: 90 | Name: ifin | Rank: Mythic (16 stars) | UID: 1090685666 (13380) | Registered: 2021-10-22T09:09:33.000Z",
+  "jeanlouiebiag@gmail.com:Louie12345 | Level: 95 | Name: Young louie25 | Rank: Mythic Honor (29 stars) | UID: 253171241 (3536) | Registered: 2018-07-06T04:09:19.000Z",
+  "ahmadalfairuz20040803@gmail.com:Ahmadalfairuz03Agustus | Level: 97 | Name: 24434 | F R S Z | Rank: Mythic Glory (51 stars) | UID: 621594588 (10137) | Registered: 2020-01-25T10:23:37.000Z",
+  "ordep1021@gmail.com:Junordep10 | Level: 95 | Name: VivaLaVida | Rank: Mythic (8 stars) | UID: 287411295 (3582) | Registered: 2018-09-08T13:47:09.000Z",
+  "lovingsuchiang@gmail.com:Suchiang00 | Level: 98 | Name: [Computer] HeldensLo | Rank: Mythic (23 stars) | UID: 852293976 (12378) | Registered: 2020-11-27T10:44:32.000Z",
+  "jevinrenjiro@gmail.com:73vonpoyO | Level: 96 | Name: ZumaGaleer. | Rank: Mythic Glory (72 stars) | UID: 804126663 (12219) | Registered: 2020-09-22T23:49:20.000Z",
+  "ridwankholifatus07@gmail.com:Gingga322123 | Level: 100 | Name: Reedoeanne | Rank: Mythic Honor (39 stars) | UID: 57650329 (2095) | Registered: 2017-05-17T09:07:54.000Z",
+  "imronartist37@gmail.com:Jakarta123456 | Level: 96 | Name: Olivers. | Rank: Mythic Glory (66 stars) | UID: 136085193 (2696) | Registered: 2017-12-14T05:18:58.000Z",
+  "mrnangin1@gmail.com:Nangin123 | Level: 92 | Name: [SS]THE CRUEL[SS] | Rank: Mythic (24 stars) | UID: 73070779 (2044) | Registered: 2017-07-03T11:47:15.000Z",
+  "ranggiandikha22@gmail.com:Ranggi1204 | Level: 99 | Name: Geff. | Rank: Mythic Glory (57 stars) | UID: 104503060 (2523) | Registered: 2017-09-30T11:32:27.000Z",
+  "cucuhidayat288@gmail.com:Cucuhidayat288sayang | Level: 98 | Name: FL∆SH™Culay | Rank: Mythic Honor (25 stars) | UID: 71867455 (2134) | Registered: 2017-06-30T07:07:06.000Z",
+  "rsuprieyadi@gmail.com:Gudanggaram21 | Level: 94 | Name: Alexander ft Rnndbzz | Rank: Mythic Honor (37 stars) | UID: 49189163 (2081) | Registered: 2017-04-15T15:11:43.000Z",
+  "joshzafe22@gmail.com:Teardrops22 | Level: 98 | Name: HATEMENOW | Rank: Mythic Glory (50 stars) | UID: 542857250 (10001) | Registered: 2019-10-04T03:23:40.000Z",
+  "aariemarie123@gmail.com:Archi1114 | Level: 98 | Name: axile | Rank: Mythic Honor (43 stars) | UID: 326613971 (3650) | Registered: 2018-11-20T00:47:14.000Z",
+  "herdyputra36@gmail.com:Herdyputra93 | Level: 98 | Name: N1eL. | Rank: Mythic Glory (67 stars) | UID: 193331526 (9001) | Registered: 2018-03-26T08:50:59.000Z",
+  "ahmadekaentaru@gmail.com:Ziizou2006 | Level: 94 | Name: Juu  Kagenou | Rank: Mythic Glory (59 stars) | UID: 434810277 (2271) | Registered: 2019-05-01T11:42:09.000Z",
+  "bagasramadhan52@gmail.com:Dhouleb123 | Level: 97 | Name: S H E I G A | Rank: Mythic Glory (66 stars) | UID: 44779500 (2073) | Registered: 2017-03-28T12:04:50.000Z",
+  "bagussalma5@gmail.com:Sugabjhf4 | Level: 95 | Name: sugab faiq | Rank: Mythic (2 stars) | UID: 412782467 (9927) | Registered: 2019-03-30T04:57:19.000Z",
+  "andyfadhila833@gmail.com:Theblues1905 | Level: 98 | Name: AreZzz | Rank: Mythic Honor (44 stars) | UID: 212550972 (9110) | Registered: 2018-04-28T02:34:52.000Z",
+  "gutierrezpatrickjun05@gmail.com:Matampuhin15 | Level: 98 | Name: ᴘᴛᴡᴄᴋ | Rank: Mythic Honor (37 stars) | UID: 326871425 (3644) | Registered: 2018-11-20T08:28:14.000Z",
+  "yhosinleksanpratama@gmail.com:KhU4LbF3tYq8wx91zSaP | Level: 99 | Name: yoshinalex | Rank: Mythic Glory (66 stars) | UID: 38012982 (2063) | Registered: 2017-02-25T05:37:34.000Z",
+  "mohaydimapanat@gmail.com:Moay123003 | Level: 96 | Name: ᴍɪᴋᴇʏシ︎ | Rank: Mythic Honor (33 stars) | UID: 717385604 (10338) | Registered: 2020-06-01T11:13:19.000Z",
+  "vaishnochaudhary336@gmail.com:Herohx250r | Level: 97 | Name: Shikaari F5 | Rank: Mythic Glory (50 stars) | UID: 195046789 (2996) | Registered: 2018-03-28T18:15:20.000Z",
+  "rama99x@gmail.com:Rama1111 | Level: 92 | Name: Rama99x | Rank: Mythic Glory (68 stars) | UID: 646343444 (8585) | Registered: 2020-03-02T08:14:39.000Z",
+  "zencrafter2004@gmail.com:Zandju2004 | Level: 90 | Name: Azusha | Rank: Mythic (3 stars) | UID: 237639193 (9260) | Registered: 2018-06-10T02:09:05.000Z",
+  "jayajibun@gmail.com:Killall99 | Level: 99 | Name: warfrix | Rank: Mythic (7 stars) | UID: 499926424 (3345) | Registered: 2019-08-01T13:02:48.000Z",
+  "koengsopha101@gmail.com:129812Kh | Level: 99 | Name: JawKdab | Rank: Mythic Honor (27 stars) | UID: 95678327 (3009) | Registered: 2017-09-06T08:27:06.000Z",
+  "cahmboh2501@gmail.com:Johan25 | Level: 96 | Name: H a n a r i e | Rank: Mythic (21 stars) | UID: 919051736 (12637) | Registered: 2021-03-02T06:17:54.000Z",
+  "helehheleh92@gmail.com:Rafihadi021 | Level: 95 | Name: Groomy | Rank: Mythic (21 stars) | UID: 369753847 (9694) | Registered: 2019-01-24T12:56:10.000Z",
+  "imaclaretian@gmail.com:Superproxy1191391998 | Level: 92 | Name: ғʟᴀsʜ. | Rank: Mythic Glory (55 stars) | UID: 9965461 (3201) | Registered: 2016-11-14T08:01:13.000Z",
+  "gunkdex0795@gmail.com:Naskeleng126 | Level: 91 | Name: Celepuk_nengkleng69 | Rank: Mythic Honor (27 stars) | UID: 334803745 (9281) | Registered: 2018-12-03T01:30:03.000Z",
+  "olandhika1@gmail.com:Olandhika31 | Level: 100 | Name: ᴵᴼᴺ┃Zipo® | Rank: Mythic Glory (61 stars) | UID: 50998061 (2083) | Registered: 2017-04-22T17:18:51.000Z",
+  "agungtep@gmail.com:Trieka27 | Level: 91 | Name: bule27 | Rank: Mythic (13 stars) | UID: 65096263 (2110) | Registered: 2017-06-09T21:04:59.000Z",
+  "jilanmuhadzdzib@icloud.com:Ihatehack99 | Level: 97 | Name: Lannn. | Rank: Mythic Glory (91 stars) | UID: 620614286 (8472) | Registered: 2020-01-24T06:45:42.000Z",
+  "maulidansyah2005@gmail.com:Maulid200405 | Level: 97 | Name: type afk | Rank: Mythic Honor (31 stars) | UID: 505496589 (8031) | Registered: 2019-08-10T04:34:59.000Z",
+  "herikurniawan2003@gmail.com:Heri2508 | Level: 90 | Name: Káng Hérrr港 | Rank: Epic IV | UID: 1389582690 (15729) | Registered: 2023-03-07T11:40:40.000Z",
+  "christienneherri17@gmail.com:Allan1703259302 | Level: 100 | Name: Nerri.A | Rank: Mythic Honor (34 stars) | UID: 245747638 (3240) | Registered: 2018-06-22T23:09:04.000Z",
+  "bjnmhrzn123@gmail.com:Apsara9803889614 | Level: 100 | Name: Bjn mhrzn | Rank: Mythic Honor (31 stars) | UID: 935431866 (12721) | Registered: 2021-03-26T18:51:06.000Z",
+  "xianreeddc@gmail.com:Xianreeddc08 | Level: 90 | Name: epickxian | Rank: Mythic Honor (33 stars) | UID: 1146489927 (11316) | Registered: 2022-01-04T21:35:37.000Z",
+  "cmdm1990@yahoo.com:MLmakmak1990 | Level: 93 | Name: Xtianmark | Rank: Mythic Honor (33 stars) | UID: 283827141 (3578) | Registered: 2018-09-01T15:49:49.000Z",
+  "selestinussiboromtp@gmail.com:MarudutS1 | Level: 96 | Name: Rzy° | Rank: Mythic Honor (26 stars) | UID: 529852753 (1014) | Registered: 2019-09-14T03:08:09.000Z",
+  "shakil72342khan@gmail.com:72342Khan | Level: 93 | Name: Hunter Cr-7 | Rank: Mythic (13 stars) | UID: 232057893 (9217) | Registered: 2018-05-31T18:06:27.000Z",
+  "alcantara.jayr07@gmail.com:Esmerald07 | Level: 100 | Name: エース | Rank: Mythic Glory (82 stars) | UID: 30335940 (3040) | Registered: 2017-01-20T19:00:01.000Z",
+  "tantodoank87@gmail.com:Ml3301278 | Level: 94 | Name: Octa2008 | Rank: Mythic Honor (29 stars) | UID: 358097792 (9618) | Registered: 2019-01-06T09:11:55.000Z",
+  "rahmad.banni@gmail.com:Branislav2 | Level: 93 | Name: banniecxz | Rank: Mythic Glory (51 stars) | UID: 57828049 (2095) | Registered: 2017-05-18T01:28:48.000Z",
+  "henriquetoregiani17@gmail.com:Ht844645123 | Level: 94 | Name: Toregiani | Rank: Mythic (21 stars) | UID: 106766959 (1204) | Registered: 2017-10-06T11:08:35.000Z",
+  "seraborneo1@gmail.com:Dago84 | Level: 94 | Name: @re$88 | Rank: Mythic Honor (38 stars) | UID: 534984292 (8152) | Registered: 2019-09-21T11:06:43.000Z",
+  "navfarelbagastianmartin@gmail.com:Nafarel13 | Level: 93 | Name: LynchNoMercy. | Rank: Mythic Glory (54 stars) | UID: 756205718 (12018) | Registered: 2020-07-21T01:55:40.000Z",
+  "kadekwijaya2080@gmail.com:Pande2wijaya | Level: 92 | Name: — Faaryllstar | Rank: Mythic Glory (50 stars) | UID: 842334972 (12338) | Registered: 2020-11-13T03:39:49.000Z",
+  "rezahafizapay@gmail.com:Apay24 | Level: 94 | Name: apay | Rank: Mythic Honor (25 stars) | UID: 1166517274 (13716) | Registered: 2022-02-07T12:38:30.000Z",
+  "carlos.garcia006@deped.gov.ph:Cbg0126 | Level: 99 | Name: tong its | Rank: Mythic (9 stars) | UID: 224415959 (3516) | Registered: 2018-05-18T14:37:34.000Z",
+  "boreyven9@gmail.com:Borey7777777 | Level: 91 | Name: Borey | Rank: Mythic Honor (34 stars) | UID: 424880378 (3898) | Registered: 2019-04-16T15:15:50.000Z",
+  "mr.nazri123@gmail.com:Zull2003 | Level: 99 | Name: ✿zуυℓ✿ | Rank: Mythic Honor (29 stars) | UID: 277235427 (9430) | Registered: 2018-08-20T07:18:44.000Z",
+  "sharohia511@gmail.com:Lahomi3100 | Level: 91 | Name: Sharo Hia | Rank: Mythic (7 stars) | UID: 332435295 (9225) | Registered: 2018-11-29T11:03:13.000Z",
+  "naindaah15@gmail.com:Naii15041998 | Level: 99 | Name: Naaa_ | Rank: Mythic (3 stars) | UID: 148474848 (2755) | Registered: 2018-01-05T23:36:06.000Z",
+  "pasa_ogame@hotmail.com:Parolasafak1 | Level: 90 | Name: ✪ Danesh | Rank: Mythic Honor (47 stars) | UID: 1105732712 (4351) | Registered: 2021-11-06T17:33:29.000Z",
+  "fauziihsan450@gmail.com:Barkid17 | Level: 98 | Name: MoDra` | Rank: Mythic Honor (44 stars) | UID: 594793325 (8373) | Registered: 2019-12-19T16:50:48.000Z",
+  "ilhamjojos@gmail.com:Ripcurl48 | Level: 96 | Name: batang hitam | Rank: Mythic (19 stars) | UID: 199575039 (9046) | Registered: 2018-04-05T10:25:24.000Z",
+  "liltanconplay@gmail.com:Sxirch58 | Level: 92 | Name: Tizbear | Rank: Mythic Honor (44 stars) | UID: 403903940 (3842) | Registered: 2019-03-16T23:52:42.000Z",
+  "paisgans677788@gmail.com:Acckof111 | Level: 99 | Name: RILL | Rank: Mythic Honor (38 stars) | UID: 217846774 (3506) | Registered: 2018-05-07T04:28:12.000Z",
+  "rodeldeleon199718@gmail.com:CmDsCcrpy2iSSSQ | Level: 93 | Name: MEDIC | Rank: Mythic (24 stars) | UID: 390011618 (3804) | Registered: 2019-02-24T01:03:09.000Z",
+  "anandapurba24@gmail.com:Ap242424 | Level: 96 | Name: Tn. Dhajat | Rank: Mythic Honor (28 stars) | UID: 112588596 (2575) | Registered: 2017-10-21T11:42:09.000Z",
+  "emotionalwp@gmail.com:Angelauserako2224 | Level: 96 | Name: Nandokun | Rank: Mythic Honor (40 stars) | UID: 421699098 (3890) | Registered: 2019-04-12T06:15:48.000Z",
+  "azhariramadhan1992@gmail.com:Azrarama19 | Level: 100 | Name: Vinsmoke Reiju | Rank: Mythic Glory (50 stars) | UID: 132888278 (2671) | Registered: 2017-12-07T21:29:55.000Z",
+  "hanhanprakoso@gmail.com:Loversangelz26 | Level: 92 | Name: god øƒ Zeus | Country: ID | Rank: Mythic (19 stars) | UID: 81393710 (2157) | Registered: 2017-07-28T01:38:16.000Z",
+  "sujana.asak@gmail.com:Sundfrust1 | Level: 98 | Name: S.Jan | Country: ID | Rank: Mythic Honor (37 stars) | UID: 49317612 (2082) | Registered: 2017-04-16T05:09:21.000Z",
+  "ynhad0721@gmail.com:Johnynhad1 | Level: 99 | Name: frankingstyne | Country: ES | Rank: Mythic Honor (29 stars) | UID: 310850396 (4064) | Registered: 2018-10-23T10:28:57.000Z",
+  "Sparshan144@gmail.com:Sparshan2062144 | Level: 92 | Name: gordan dada | Country: NP | Rank: Mythic Glory (54 stars) | UID: 1073682793 (13293) | Registered: 2021-09-29T07:32:20.000Z",
+  "vannesseptiyanto@gmail.com:Nes086872 | Level: 93 | Name: Tokyo'お | Country: ID | Rank: Mythic Glory (63 stars) | UID: 14055183 (2017) | Registered: 2016-11-27T13:21:34.000Z",
+  "atulvarghese3399@gmail.com:9744755891aA | Level: 98 | Name: ༒Onmyoji | Country: IN | Rank: Mythic (22 stars) | UID: 214014543 (9120) | Registered: 2018-04-30T10:56:34.000Z",
+  "rinahmar12@gmail.com:Andrewzote123 | Level: 92 | Name: AndrewCurry | Country: IN | Rank: Mythic Honor (31 stars) | UID: 192662107 (2992) | Registered: 2018-03-24T14:45:47.000Z"
+],
+  [
+  "sandrinhabiscuit2@gmail.com:Pj14271008 | Level: 6 | Name: Sandrinha27 | Country: BR | Rank: Warrior III | UID: 1071771825 (1463) | Registered: 2021-09-27T00:37:11.000Z",
+  "konyvesricsi02@gmail.com:Ricsi2009 | Level: 12 | Name: Westerneq | Country: HU | Rank: Master III | UID: 1242176365 (6579) | Registered: 2022-06-06T11:02:39.000Z",
+  "mi.almacenamiento.cpu@gmail.com:Esbuster1 | Level: 17 | Name: TOP.Jungla | Country: PE | Rank: Elite III | UID: 1041912084 (1444) | Registered: 2021-08-17T15:29:42.000Z",
+  "abdirizakplayzyt@gmail.com:A78073aa | Level: 11 | Name: Marshadowninja | Country: US | Rank: Warrior I | UID: 732559848 (5255) | Registered: 2020-06-20T03:43:34.000Z",
+  "darmaaddaily1@gmail.com:Kucintai1 | Level: 14 | Name: darmaaddaily | Country: ID | Rank: Warrior II | UID: 35096801 (2056) | Registered: 2017-02-11T11:36:42.000Z",
+  "kaboobies7@gmail.com:techMind1 | Level: 21 | Name: Kaboomboom1212 | Country: AU | Rank: Master II | UID: 297650191 (9554) | Registered: 2018-09-28T05:09:05.000Z",
+  "rayhanvin8@gmail.com:R4yh4nv1n | Level: 16 | Name: MelonGaming74 | Country: ID | Rank: Grandmaster V | UID: 708541249 (8815) | Registered: 2020-05-22T03:07:17.000Z",
+  "sacramenton12@gmail.com:New546789 | Level: 10 | Name: Zorde`$ | Country: BR | Rank: Warrior III | UID: 1083446179 (1474) | Registered: 2021-10-12T02:28:56.000Z",
+  "ukrm.dlls2604@gmail.com:Kingkangkung99 | Level: 9 | Name: GrotequetteRè | Country: MY | Rank: Warrior II | UID: 339696897 (9668) | Registered: 2018-12-10T17:13:42.000Z",
+  "azrin.petra@gmail.com:Letmein2day | Level: 10 | Name: Azrin | Country: AU | Rank: Master III | UID: 1218656832 (8613) | Registered: 2022-04-26T21:47:10.000Z",
+  "Immalki8@gmail.com:Mumu1212 | Level: 9 | Name: mocro528 | Country: DE | Rank: Elite II | UID: 668995422 (6317) | Registered: 2020-04-03T00:34:22.000Z",
+  "asixpogba@gmail.com:ANWARraja720 | Level: 10 | Name: ASIX $ | Country: MA | Rank: Elite III | UID: 383190278 (4043) | Registered: 2019-02-13T16:01:10.000Z",
+  "moisespeace1300@gmail.com:Messi24187 | Level: 5 | Name: scart24 | Country: MX | Rank: Warrior III | UID: 337816108 (5009) | Registered: 2018-12-08T02:34:16.000Z",
+  "kioresko1@gmail.com:2kj3TfLG8 | Level: 20 | Name: edik.kio | Country: UA | Rank: Master IV | UID: 670909880 (6315) | Registered: 2020-04-05T13:13:30.000Z",
+  "reianangelo@gmail.com:Reiangelo626 | Level: 14 | Name: Rain Rain Go Away | Country: PH | Rank: Master IV | UID: 927059296 (10790) | Registered: 2021-03-14T04:53:09.000Z",
+  "hasanhidayaturrohman@gmail.com:Hasan121534 | Level: 22 | Name: GPP|OG | Country: ID | Rank: Grandmaster IV | UID: 896006030 (12552) | Registered: 2021-01-28T01:33:52.000Z",
+  "jason000056@gmail.com:Jasser007 | Level: 27 | Name: TiTan1UM | Country: TN | Rank: Master III | UID: 629639303 (4201) | Registered: 2020-02-06T11:10:53.000Z",
+  "ledcarjc@gmail.com:Jhos9001 | Level: 25 | Name: Jhoss | Country: CL | Rank: Elite III | UID: 16243190 (1201) | Registered: 2016-12-05T03:42:42.000Z",
+  "alfieafiqi948@gmail.com:alfieafiqi2007D | Level: 9 | Name: Kiddkenobi2 | Country: MY | Rank: Warrior III | UID: 677223279 (8695) | Registered: 2020-04-13T18:58:01.000Z",
+  "brad_a15@hotmail.com:Naciel4deagosto | Level: 11 | Name: BRADSITO! | Country: PE | Rank: Elite I | UID: 1008704970 (1425) | Registered: 2021-07-03T01:33:48.000Z",
+  "oleksandrivanciv@gmail.com:Fuckme1304 | Level: 9 | Name: Roodey | Country: UA | Rank: Warrior III | UID: 678317696 (6319) | Registered: 2020-04-15T07:59:43.000Z",
+  "lancethegallade3@gmail.com:Lance1532 | Level: 17 | Name: RG RoGuexx | Country: ZA | Rank: Elite III | UID: 619240333 (6290) | Registered: 2020-01-22T06:30:53.000Z",
+  "hatimisertine1@gmail.com:Hatim2005 | Level: 8 | Name: supra_tren | Country: MA | Rank: Warrior III | UID: 1443050475 (4419) | Registered: 2023-06-15T19:38:18.000Z",
+  "felipe.pereira2005@gmail.com:Felipe10 | Level: 16 | Name: Felps | Country: BR | Rank: Elite I | UID: 721335558 (1285) | Registered: 2020-06-09T05:10:14.000Z",
+  "calzada.alejandro14@gmail.com:Neoalucard1997 | Level: 28 | Name: Neoalucard25 | Country: BO | Rank: Epic II | UID: 1223015054 (1539) | Registered: 2022-05-02T04:57:04.000Z",
+  "oktofianusmananggo@gmail.com:Oktofianus2216 | Level: 22 | Name: earth2216 | Country: ID | Rank: Grandmaster IV | UID: 524686209 (8096) | Registered: 2019-09-06T10:54:07.000Z",
+  "brochaqqq@gmail.com:Mm5931447 | Level: 8 | Name: Roosarch | Country: CO | Rank: Elite III | UID: 614239845 (5036) | Registered: 2020-01-14T14:03:15.000Z",
+  "iinelviragint@gmail.com:Iinelvira15 | Level: 26 | Name: YOUR BAE | Country: ID | Rank: Mythic (11 stars) | UID: 1393781099 (15743) | Registered: 2023-03-15T06:05:33.000Z",
+  "honeybeeuwu@gmail.com:123Quesito | Level: 9 | Name: carvax | Country: CR | Rank: Elite III | UID: 1284882047 (5385) | Registered: 2022-08-27T15:22:39.000Z",
+  "lsprdm@gmail.com:Tortrix2013 | Level: 24 | Name: luigi2013 | Country: GT | Rank: Master IV | UID: 1218810520 (5371) | Registered: 2022-04-27T02:59:19.000Z",
+  "wilmerrobayoaviles@gmail.com:Prepuner0625 | Level: 16 | Name: Matapirobos | Country: CO | Rank: Warrior III | UID: 921222022 (5293) | Registered: 2021-03-05T12:57:20.000Z",
+  "joaogordo00@hotmail.com:Novasenha1 | Level: 20 | Name: pplperez | Country: BR | Rank: Grandmaster IV | UID: 88992963 (1033) | Registered: 2017-08-19T01:11:59.000Z",
+  "ignaciorokero13@gmail.com:ignacioR0k3ro13 | Level: 11 | Name: chorisus | Country: BO | Rank: Elite III | UID: 664719709 (1255) | Registered: 2020-03-27T21:46:27.000Z",
+  "yzhennn0529@gmail.com:2000529yzhenTAI | Level: 19 | Name: Failure Of God | Country: MY | Rank: Master II | UID: 32814427 (2206) | Registered: 2017-01-31T12:36:46.000Z",
+  "pedro_pujay15@hotmail.com:Pedrone1711 | Level: 20 | Name: PuJaY | Country: PE | Rank: Elite II | UID: 704207871 (1278) | Registered: 2020-05-17T05:06:21.000Z",
+  "pornsuda5257@gmail.com:Manu2552 | Level: 15 | Name: Thaiman | Country: TH | Rank: Grandmaster IV | UID: 939021397 (12716) | Registered: 2021-04-01T08:10:49.000Z",
+  "darrius72irfan@gmail.com:Darrius09 | Level: 15 | Name: black boi2K> | Country: MY | Rank: Master I | UID: 1264218660 (15138) | Registered: 2022-07-18T12:20:34.000Z",
+  "Norlan19v.n@gmail.com:Norlan4256 | Level: 13 | Name: xXDESNORXx | Country: CR | Rank: Master II | UID: 764510255 (5205) | Registered: 2020-08-01T04:13:41.000Z",
+  "habibharb8@gmail.com:20164947aA | Level: 18 | Name: harb😍 | Country: TN | Rank: Grandmaster V | UID: 394245869 (4051) | Registered: 2019-03-02T11:50:40.000Z",
+  "akuntestygke15@gmail.com:Angkung15 | Level: 18 | Name: Orang Dalam | Country: ID | Rank: Grandmaster I | UID: 1612547050 (16819) | Registered: 2024-04-22T21:10:48.000Z",
+  "izukumidorya176@gmail.com:gokuGOKU13 | Level: 15 | Name: Diegoblast | Country: IT | Rank: Master I | UID: 1378070391 (6652) | Registered: 2023-02-15T19:33:04.000Z",
+  "aragon.balaz4@gmail.com:Rb17102006 | Level: 11 | Name: Elite Dragon | Country: SK | Rank: Warrior I | UID: 441651663 (6018) | Registered: 2019-05-11T09:57:18.000Z",
+  "nstasiak97@gmail.com:Rainbow000 | Level: 4 | Name: kattybratt | Country: GB | Rank: Warrior III | UID: 1312645180 (4392) | Registered: 2022-10-22T22:40:18.000Z",
+  "florin.modiga@yahoo.com:Optimusprime122 | Level: 15 | Name: 2PacMarshall | Country: RO | Rank: Master II | UID: 402410326 (6081) | Registered: 2019-03-14T19:50:19.000Z",
+  "contatodoisponto@gmail.com:Mayara123 | Level: 20 | Name: Doisponto | Country: BR | Rank: Master I | UID: 154490244 (1043) | Registered: 2018-01-16T13:42:13.000Z",
+  "ilienaj87@gmail.com:Ilieaziz87 | Level: 27 | Name: Sistor | Country: MY | Rank: Grandmaster II | UID: 936347787 (12702) | Registered: 2021-03-28T04:38:49.000Z",
+  "ytc7665@gmail.com:1234Sg05 | Level: 10 | Name: K.Styx65 | Country: TR | Rank: Warrior III | UID: 459309748 (4056) | Registered: 2019-06-04T11:22:33.000Z",
+  "rumel496@gmail.com:Bozijidar1 | Level: 20 | Name: mladja1984 | Country: RS | Rank: Master IV | UID: 264431599 (4215) | Registered: 2018-07-26T07:54:36.000Z",
+  "wsnugaming3@gmail.com:Wisnuaji1928 | Level: 13 | Name: Botaxx!! | Country: ID | Rank: Master III | UID: 1192743992 (13855) | Registered: 2022-03-27T14:54:57.000Z",
+  "corluemin@gmail.com:Dlmadol123 | Level: 21 | Name: Kaiśer | Country: TR | Rank: Grandmaster III | UID: 432683067 (4212) | Registered: 2019-04-28T09:21:23.000Z",
+  "endikasunaryo02@gmail.com:16Feb2001 | Level: 16 | Name: Endika | Country: ID | Rank: Master I | UID: 205361783 (9086) | Registered: 2018-04-15T03:43:20.000Z",
+  "tasrinelektro@gmail.com:Mamuju4321 | Level: 8 | Name: Dandelion King | Country: ID | Rank: Warrior III | UID: 1636382359 (16936) | Registered: 2024-06-02T00:28:10.000Z",
+  "creepili1631@gmail.com:Anabel4982 | Level: 16 | Name: Xelit0320 | Country: AR | Rank: Master IV | UID: 1133388694 (1538) | Registered: 2022-05-09T23:22:25.000Z",
+  "aliefeacikgoz5@gmail.com:E47878e4 | Level: 21 | Name: Papy_Exe | Country: TR | Rank: Grandmaster II | UID: 1401918696 (4409) | Registered: 2023-03-29T20:54:12.000Z",
+  "wangkevin724@gmail.com:0922688Gg | Level: 27 | Name: Prospocelツ | Country: ID | Rank: Grandmaster V | UID: 459637294 (2382) | Registered: 2019-06-04T23:43:49.000Z",
+  "xxxjewsterxxx@gmail.com:Nightmist12 | Level: 24 | Name: KILLWEN {KW} | Country: MY | Rank: Legend V | UID: 1313211282 (15367) | Registered: 2022-10-23T23:07:02.000Z",
+  "izrul_ghost8@yahoo.com:Limakupang5 | Level: 10 | Name: MiaX | Country: MY | Rank: Warrior I | UID: 1121278936 (13511) | Registered: 2021-11-27T12:53:11.000Z",
+  "rodrigogarciael1@gmail.com:cucaracha0aA | Level: 20 | Name: Yiockey | Country: AR | Rank: Master IV | UID: 686925983 (1271) | Registered: 2020-04-26T09:04:45.000Z",
+  "batuhan.sen1992@gmail.com:55119218aA | Level: 26 | Name: BassJackeRs | Country: TR | Rank: Master III | UID: 11756789 (4009) | Registered: 2016-11-19T19:28:30.000Z",
+  "danielmac764@gmail.com:Mar10bros | Level: 13 | Name: Danielavcc | Country: MX | Rank: Warrior III | UID: 1647516068 (5445) | Registered: 2024-06-18T20:25:58.000Z",
+  "muhammadriyen@gmail.com:Riyen123aku | Level: 10 | Name: R1enn94 | Country: ID | Rank: Warrior III | UID: 527831799 (8114) | Registered: 2019-09-10T19:17:17.000Z",
+  "hasnurridho.ilham58@gmail.com:Vanjava060201 | Level: 25 | Name: Zhā$kē™✓ | Country: ID | Rank: Master IV | UID: 162558301 (2832) | Registered: 2018-01-31T03:25:01.000Z",
+  "mohovnikita09@gmail.com:183590Nikita | Level: 9 | Name: Freizon | Country: RU | Rank: Master IV | UID: 1332996235 (6628) | Registered: 2022-12-01T18:04:28.000Z",
+  "shadowbrashowgane@gmail.com:Shadow6000 | Level: 13 | Name: BGS6000 | Country: EG | Rank: Elite I | UID: 1469021495 (6703) | Registered: 2023-08-03T13:42:14.000Z",
+  "patryk.piros511@gmail.com:Patryczek172 | Level: 20 | Name: EpTka_PietreQ | Country: PL | Rank: Master I | UID: 652218534 (6310) | Registered: 2020-03-10T20:30:27.000Z",
+  "firazclon@gmail.com:Zaffiraz01 | Level: 10 | Name: Zaff X Gaming | Country: MY | Rank: Elite I | UID: 858313883 (12398) | Registered: 2020-12-06T02:16:27.000Z",
+  "chuletadetandil@hotmail.com:Remigio22 | Level: 8 | Name: ANAK KONTOL | Country: AR | Rank: Warrior III | UID: 248799452 (1209) | Registered: 2018-06-28T05:00:01.000Z",
+  "joshaloha92@gmail.com:Avenido1988 | Level: 18 | Name: Heavenknows92 | Country: PH | Rank: Master IV | UID: 705602595 (10304) | Registered: 2020-05-18T16:00:49.000Z",
+  "nerostriker99@gmail.com:FairyTail9 | Level: 21 | Name: NeroStriker | Country: AR | Rank: Grandmaster III | UID: 80138660 (1008) | Registered: 2017-07-23T18:23:26.000Z",
+  "psilvasousa@gmail.com:Canab1s0nline | Level: 14 | Name: Cjunkie | Country: PT | Rank: Warrior III | UID: 92163590 (4029) | Registered: 2017-08-27T17:23:03.000Z",
+  "riansyahedi98@gmail.com:Ediriansyah98 | Level: 29 | Name: no body | Country: ID | Rank: Epic V | UID: 132910046 (2662) | Registered: 2017-12-07T23:49:21.000Z",
+  "axkeeva@gmail.com:Semangat45 | Level: 26 | Name: K a z e k a g e | Country: ID | Rank: Legend IV | UID: 1406433189 (15797) | Registered: 2023-04-06T21:20:27.000Z",
+  "rusik000999@gmail.com:rusikTV1 | Level: 12 | Name: ZXC1000-7 | Country: AZ | Rank: Elite III | UID: 920648037 (6442) | Registered: 2021-03-04T14:56:19.000Z",
+  "leoos20142015.lm@gmail.com:240422Flor | Level: 24 | Name: Leoos@7914 | Country: AR | Rank: Epic V | UID: 1296683734 (1564) | Registered: 2022-09-21T06:10:28.000Z",
+  "mevlutdemirkol@gmail.com:Sanane32 | Level: 23 | Name: ReLLoG | Country: TR | Rank: Master IV | UID: 56981455 (4002) | Registered: 2017-05-14T18:04:50.000Z",
+  "jonasdemelocontato@gmail.com:Jo34642424 | Level: 9 | Name: Jonasdemelo | Country: BR | Rank: Warrior I | UID: 876140145 (1364) | Registered: 2020-12-29T23:52:53.000Z",
+  "markczeroczki2001@gmail.com:Penge211 | Level: 12 | Name: Pandaharcos64 | Country: HU | Rank: Elite II | UID: 412531147 (6089) | Registered: 2019-03-29T17:02:54.000Z",
+  "melihcanerturk23@gmail.com:Fenerbahce1907 | Level: 19 | Name: melihcan | Country: TR | Rank: Master IV | UID: 518415004 (4226) | Registered: 2019-08-28T23:21:34.000Z",
+  "tec.ref.rafael@gmail.com:Cindacta4 | Level: 5 | Name: Rafael Alencar | Country:  | Rank: Warrior III | UID: 278953 (1002) | Registered: 2016-08-10T17:53:30.000Z",
+  "noskaj16@gmail.com:Noskaj729513 | Level: 13 | Name: Noskaj | Country: BR | Rank: Warrior III | UID: 101023503 (1034) | Registered: 2017-09-20T23:54:52.000Z",
+  "robervalgeas@hotmail.com:Paladino99 | Level: 19 | Name: seymour99 | Country: BR | Rank: Master I | UID: 731651931 (1290) | Registered: 2020-06-18T22:25:42.000Z",
+  "vitorchanpam@hotmail.com:99591867vV | Level: 16 | Name: HS-ALUCARD | Country: BR | Rank: Master II | UID: 722063194 (1286) | Registered: 2020-06-07T01:18:09.000Z",
+  "laugusto811@gmail.com:L17742136l | Level: 16 | Name: xDarkVzla66x | Country: CL | Rank: Warrior III | UID: 514775959 (1223) | Registered: 2019-08-23T23:36:52.000Z",
+  "Banda849@gmail.com:Almazan123 | Level: 25 | Name: Zenebe | Country: MX | Rank: Warrior III | UID: 654824325 (5249) | Registered: 2020-03-14T13:07:54.000Z",
+  "ctonholo@gmail.com:Sisten32 | Level: 16 | Name: atoaqui | Country: BR | Rank: Master IV | UID: 790081539 (1312) | Registered: 2020-09-04T11:43:45.000Z",
+  "naufal1h1h@gmail.com:Hougang27 | Level: 8 | Name: Apainaufal | Country: SG | Rank: Elite III | UID: 723866811 (8884) | Registered: 2020-06-09T05:15:08.000Z",
+  "zikkzaidensm@gmail.com:Zikk123014 | Level: 18 | Name: Fabio Mill*82 | Country: PH | Rank: Legend III | UID: 1387893573 (14206) | Registered: 2023-03-04T12:27:10.000Z",
+  "Platenhighlights@gmail.com:159Murat159 | Level: 15 | Name: murat.kalmaoglu | Country: TR | Rank: Master III | UID: 614942413 (4046) | Registered: 2020-01-15T17:29:47.000Z",
+  "mackykentzie23@gmail.com:Kentzie1981 | Level: 9 | Name: divikielsam | Country: PH | Rank: Warrior II | UID: 671604174 (10246) | Registered: 2020-04-06T12:52:54.000Z",
+  "jademarkaquino@gmail.com:Illuminati214 | Level: 17 | Name: ♧Zant♧ | Country: PH | Rank: Master II | UID: 388382410 (3795) | Registered: 2019-02-21T13:58:51.000Z",
+  "hussein.bin.omar@gmail.com:Hussein1418 | Level: 16 | Name: 7ussein | Country: SA | Rank: Master I | UID: 837263290 (6393) | Registered: 2020-11-05T20:59:47.000Z",
+  "edierjlv@gmail.com:Volmir365 | Level: 5 | Name: Nieve*890 | Country: CO | Rank: Warrior III | UID: 1175977581 (5364) | Registered: 2022-02-24T14:50:36.000Z",
+  "syahmi5630@gmail.com:Shahmie3272 | Level: 12 | Name: 2798 | Country: MY | Rank: Elite II | UID: 923489865 (12668) | Registered: 2021-03-08T18:06:51.000Z",
+  "panyakaewsom45@gmail.com:P13061983k | Level: 23 | Name: doohome123 | Country: TH | Rank: Grandmaster V | UID: 140462504 (2239) | Registered: 2017-12-22T11:54:42.000Z",
+  "trishlim1@gmail.com:Shang032904 | Level: 28 | Name: Esposito Bell~84 | Country: PH | Rank: Epic V | UID: 714674405 (10316) | Registered: 2020-05-29T07:51:32.000Z",
+  "mares.marian@gmail.com:QWEewq123 | Level: 25 | Name: shamps | Country: RO | Rank: Elite II | UID: 576174138 (6051) | Registered: 2019-11-23T17:33:39.000Z",
+  "colegrey0626@gmail.com:Tamiraa0626 | Level: 24 | Name: Colegreyx | Country: MN | Rank: Grandmaster IV | UID: 1112158327 (11216) | Registered: 2021-11-14T04:45:24.000Z",
+  "yigitsatar9@gmail.com:2468kj2468KJ | Level: 17 | Name: deatKİLLhere | Country: TR | Rank: Elite III | UID: 780778872 (4278) | Registered: 2020-08-23T07:51:46.000Z",
+  "lucio.toledocid@gmail.com:Peludita1 | Level: 23 | Name: kntl123 | Country: CL | Rank: Master I | UID: 483851080 (1017) | Registered: 2019-07-08T06:42:32.000Z",
+  "nda2000a@gmail.com:Cb1bhzxr | Level: 16 | Name: Typical | Country: RU | Rank: Master III | UID: 1209655971 (6569) | Registered: 2022-04-18T15:01:50.000Z",
+  "hieunamnguyen68@gmail.com:284650AZAb | Level: 13 | Name: Kinowa | Country: VN | Rank: Grandmaster IV | UID: 1735018875 (14550) | Registered: 2024-10-29T08:23:48.000Z",
+  "richardrbbd@gmail.com:Denisiane20 | Level: 13 | Name: akinori_kk | Country: BR | Rank: Warrior I | UID: 1303538210 (1579) | Registered: 2022-12-12T14:55:08.000Z",
+  "ryno.nord@gmail.com:Slowpoke89 | Level: 20 | Name: piiNk | Country: ZA | Rank: Elite II | UID: 767508009 (6358) | Registered: 2020-08-05T05:47:46.000Z",
+  "salinajdc15@gmail.com:Sunnah101 | Level: 17 | Name: thefrizzysheep | Country: GB | Rank: Grandmaster IV | UID: 1484574622 (4429) | Registered: 2023-09-02T18:37:54.000Z",
+  "jrozogarzon@gmail.com:JulianRozo12 | Level: 11 | Name: PYulian | Country: CO | Rank: Elite III | UID: 549881420 (5225) | Registered: 2019-10-14T15:15:24.000Z",
+  "thtbbgbb@gmail.com:Barbatos123 | Level: 20 | Name: Allione Rose~31 | Country: ID | Rank: Master III | UID: 1655457504 (18003) | Registered: 2024-06-28T05:36:05.000Z",
+  "paladinifranco93@gmail.com:Valentino46 | Level: 13 | Name: KarmaOmega | Country: AR | Rank: Warrior III | UID: 100671104 (1033) | Registered: 2017-09-19T23:04:53.000Z",
+  "sm78987@gmail.com:Nini1616 | Level: 9 | Name: Ghoul.Donald~57 | Country: GB | Rank: Warrior III | UID: 635124890 (4328) | Registered: 2021-06-06T20:46:42.000Z",
+  "alvinguo163@gmail.com:Alvxn136 | Level: 29 | Name: Phantom Fusion | Country: SG | Rank: Elite I | UID: 234918483 (2256) | Registered: 2018-06-05T13:24:14.000Z",
+  "nonidaniel7@gmail.com:Danielnoni002 | Level: 13 | Name: Daniel@4439 | Country: US | Rank: Master IV | UID: 670335606 (5239) | Registered: 2020-04-04T18:15:09.000Z",
+  "erollarbekir@gmail.com:Bekirerol06 | Level: 4 | Name: XTR-Orien | Country: TR | Rank: Warrior III | UID: 1504788217 (4433) | Registered: 2023-10-14T23:56:09.000Z",
+  "fbhakan12@gmail.com:Hakan0668 | Level: 29 | Name: PREDATOR♣ | Country: TR | Rank: Grandmaster V | UID: 398476129 (4050) | Registered: 2019-03-08T20:39:59.000Z",
+  "alanhung307@gmail.com:Showshia34 | Level: 8 | Name: Gura’s fans | Country: TW | Rank: Warrior II | UID: 998519232 (10979) | Registered: 2021-06-20T08:02:41.000Z",
+  "gpensdossantos55@gmail.com:Fortone2 | Level: 3 | Name: fatnty | Country: BR | Rank: Warrior III | UID: 1562227792 (1666) | Registered: 2024-01-28T02:47:38.000Z",
+  "bthn.yvz.55@gmail.com:QO7hhL2Nu3 | Level: 17 | Name: BisamXㅤ么 | Country: TR | Rank: Master IV | UID: 240715203 (4213) | Registered: 2018-06-14T15:39:42.000Z",
+  "erenozkul58@gmail.com:Adecco64 | Level: 8 | Name: Pulcco | Country: TR | Rank: Warrior I | UID: 1279305689 (4385) | Registered: 2022-08-16T18:06:43.000Z",
+  "steruskypatrik@yahoo.com:3Se31se21 | Level: 10 | Name: Trambus1337 | Country: SK | Rank: Warrior II | UID: 57488109 (6046) | Registered: 2017-05-16T15:49:09.000Z",
+  "alegarh1312@gmail.com:14051969Alex | Level: 21 | Name: ALDROZ | Country: ES | Rank: Master III | UID: 368200903 (4036) | Registered: 2019-01-21T22:08:35.000Z",
+  "iamharveym@gmail.com:Harveypogi1 | Level: 12 | Name: Pink honey | Country: DK | Rank: Warrior III | UID: 67855851 (6209) | Registered: 2017-06-18T07:37:11.000Z",
+  "dracomoriarty325@gmail.com:Mizore04 | Level: 8 | Name: REDNIGTH5 | Country: CO | Rank: Warrior III | UID: 989816978 (5309) | Registered: 2021-06-07T21:25:36.000Z",
+  "ozdemirokan.012@gmail.com:Unstopablehook07 | Level: 16 | Name: şarap | Country: TR | Rank: Epic V | UID: 965635898 (4324) | Registered: 2021-05-07T15:39:07.000Z",
+  "johnmikerodrigo@gmail.com:Blacksheep24 | Level: 23 | Name: Monoxide | Country: PH | Rank: Mythic (3 stars) | UID: 920086827 (10798) | Registered: 2021-03-03T18:09:19.000Z",
+  "anombimo02@gmail.com:AnomBimo02 | Level: 15 | Name: Napoleon123 | Country: ID | Rank: Elite II | UID: 121925011 (2607) | Registered: 2017-11-14T07:19:54.000Z",
+  "matheusleandro580@gmail.com:Matheusleandro311 | Level: 17 | Name: Leo.aish | Country: BR | Rank: Master II | UID: 607796 (1001) | Registered:",
+  "bosusrijat@gmail.com:Srijatcena123 | Level: 9 | Name: FLUXXY.ID 362828 | Rank: Warrior III | UID: 505285813 (8032) | Registered: 2019-08-09T19:42:25.000Z",
+  "madarauchiha1597@gmail.com:Wayblast1597 | Level: 18 | Name: spydeypuul | Rank: Master IV | UID: 120186112 (2622) | Registered: 2017-11-10T08:33:19.000Z",
+  "cemozdemir954@gmail.com:C1e2m31056 | Level: 21 | Name: Mrcem80 | Rank: Master I | UID: 932725097 (4316) | Registered: 2021-03-22T19:13:57.000Z",
+  "mandirip286@gmail.com:Miraj0101 | Level: 15 | Name: EVOSπ®AMBUTAN | Rank: Master III | UID: 646863063 (8579) | Registered: 2020-03-03T04:41:13.000Z",
+  "andrian.castro21@gmail.com:21051992aA | Level: 23 | Name: aj2126 | Rank: Grandmaster IV | UID: 386164180 (3797) | Registered: 2019-02-18T05:40:28.000Z",
+  "raymonbelitung@gmail.com:Raymomdc123 | Level: 28 | Name: Lemonn. | Rank: Epic V | UID: 743002761 (8956) | Registered: 2020-07-03T12:04:59.000Z",
+  "djbjungledutch@gmail.com:Gmplh08297 | Level: 9 | Name: RIARSHA | Rank: Elite I | UID: 1044485570 (13170) | Registered: 2021-08-21T09:16:31.000Z",
+  "lachihristov2007@gmail.com:Lachi5525 | Level: 17 | Name: vaneyl | Rank: Master III | UID: 686067419 (6325) | Registered: 2020-04-25T08:38:50.000Z",
+  "hwei40640@gmail.com:Geo14356682 | Level: 16 | Name: not_nothing | Rank: Epic V | UID: 1317357847 (15390) | Registered: 2022-11-01T09:21:27.000Z",
+  "cloudyskiesollan@gmail.com:Mangoes4UwU | Level: 10 | Name: GanbuuOlland | Rank: Warrior III | UID: 1221237553 (8979) | Registered: 2022-05-02T03:47:09.000Z",
+  "alfredocapah221@gmail.com:Kenzo121 | Level: 28 | Name: Fong™Ling | Rank: Legend V | UID: 963310133 (12834) | Registered: 2021-05-05T02:32:52.000Z",
+  "juliaeduardapaivadamasceno@gmail.com:Julia1234 | Level: 10 | Name: Anônima_Text | Rank: Master III | UID: 1310725233 (1574) | Registered: 2022-10-19T00:29:27.000Z",
+  "mgenokaaily@gmail.com:mAY062015 | Level: 16 | Name: AkoSiAbdul | Rank: Elite I | UID: 770634710 (10447) | Registered: 2020-08-09T12:22:18.000Z",
+  "mariavenusapura@gmail.com:13Venusapura | Level: 12 | Name: maxxisysy™ | Rank: Elite II | UID: 632538734 (10150) | Registered: 2020-02-10T14:41:11.000Z",
+  "brettnorrisworkuk@outlook.com:Juj312Dbz645uk | Level: 17 | Name: Arlonim | Rank: Master I | UID: 1626015005 (4464) | Registered: 2024-05-15T18:30:53.000Z",
+  "sapasjoker@gmail.com:AkuAksa16 | Level: 3 | Name: Dynamic. | Rank: Warrior III | UID: 1772224250 (18552) | Registered: 2024-12-25T10:06:29.000Z",
+  "gamerdx20@gmail.com:Ryannnl0l | Level: 28 | Name: Ryannl0l | Rank: Legend V | UID: 1076010722 (13804) | Registered: 2022-03-07T16:52:08.000Z",
+  "mttrindaderodrigues@gmail.com:Nigga30111991 | Level: 28 | Name: GenaraDracK | Rank: Grandmaster II | UID: 629404001 (1052) | Registered: 2020-02-06T03:12:00.000Z",
+  "bacotml775@gmail.com:NOVaL900 | Level: 22 | Name: kolisgaming | Rank: Grandmaster II | UID: 1137358307 (13604) | Registered: 2021-12-22T05:03:33.000Z",
+  "mlodykroni37@gmail.com:Kroni1337 | Level: 26 | Name: silent_devil | Rank: Master I | UID: 555153828 (6269) | Registered: 2019-10-22T17:10:21.000Z",
+  "loiacono.simon@barlettiovada.edu.it:Ultrabot21 | Level: 12 | Name: Miculz Hack | Rank: Elite III | UID: 1002581730 (6478) | Registered: 2021-06-24T18:15:16.000Z",
+  "rifkyrp64@gmail.com:Beby12345 | Level: 16 | Name: Zell | Rank: Epic I | UID: 1106483767 (13433) | Registered: 2021-11-07T08:42:00.000Z",
+  "gamboarye@gmail.com:Hatehate25 | Level: 28 | Name: HallowHan | Rank: Epic IV | UID: 28991541 (3037) | Registered: 2017-01-14T14:10:58.000Z",
+  "gionandreipabustan20@gmail.com:Sigongonlangmayalam20 | Level: 27 | Name: エクナルブマ | Rank: Grandmaster III | UID: 579708091 (10031) | Registered: 2019-11-28T23:36:18.000Z",
+  "erne04.ep@gmail.com:Ernesto123 | Level: 14 | Name: PoLix | Rank: Master IV | UID: 161963955 (6073) | Registered: 2018-01-29T19:41:39.000Z",
+  "johnhansel2400@gmail.com:Hanselpogi10 | Level: 6 | Name: Ford.Verna*19 | Rank: Warrior III | UID: 1293905910 (11508) | Registered: 2022-09-15T12:05:45.000Z",
+  "evandiaz051123@gmail.com:Teshalonika150702 | Level: 23 | Name: lambada | Rank: Epic III | UID: 1551020999 (16507) | Registered: 2024-01-08T20:50:10.000Z",
+  "jtoncel1027@gmail.com:JToncel1027 | Level: 28 | Name: LecnoT | Rank: Grandmaster I | UID: 711856101 (5259) | Registered: 2020-05-25T20:02:29.000Z",
+  "rothnoswaqz@gmail.com:Dumbkid420 | Level: 13 | Name: $wagz | Rank: Elite I | UID: 1298191873 (11516) | Registered: 2022-09-24T08:56:56.000Z",
+  "fisherjames1981@gmail.com:Ikillu1278 | Level: 16 | Name: bain | Rank: Elite II | UID: 498737626 (3345) | Registered: 2019-07-30T13:10:36.000Z",
+  "spamacc013b@gmail.com:Aeroicplr09 | Level: 20 | Name: Sibyl | Rank: Epic V | UID: 572250773 (10020) | Registered: 2019-11-18T08:03:32.000Z",
+  "zeybekibrahim584@gmail.com:Bennebilem01 | Level: 20 | Name: ㅤㅤㅤ♥♠ | Rank: Master II | UID: 905501323 (4312) | Registered: 2021-02-10T07:37:04.000Z",
+  "kodoklompat9398@gmail.com:Semuasama12 | Level: 23 | Name: AsnamShikii | Rank: Grandmaster III | UID: 1257358098 (15091) | Registered: 2022-07-05T14:57:13.000Z",
+  "leonardomaleski72@gmail.com:Leonardomale4699 | Level: 21 | Name: Negato.Cla.UZUMAKI | Rank: Master IV | UID: 1519967463 (1650) | Registered: 2023-11-15T14:36:10.000Z",
+  "agslarion470@gmail.com:100997Agslarion | Level: 5 | Name: acdc | Rank: Warrior III | UID: 1277330179 (14072) | Registered: 2022-08-13T05:08:46.000Z",
+  "bukovskileon36@gmail.com:Osvetnici1 | Level: 10 | Name: 7 7 7 | Rank: Elite I | UID: 920944233 (6442) | Registered: 2021-03-05T05:02:17.000Z",
+  "sunsetofyou@gmail.com:Anna3103 | Level: 14 | Name: elaksinayva | Rank: Elite I | UID: 619263015 (8483) | Registered: 2020-01-22T07:14:38.000Z",
+  "dan.vasconcelos1512@gmail.com:Daan1512 | Level: 24 | Name: ᎠᎪΝᵒⁿᵉ | Rank: Grandmaster V | UID: 876640903 (1363) | Registered: 2020-12-30T14:11:09.000Z",
+  "burakyzc23@gmail.com:Bryzc2308 | Level: 14 | Name: BuraKYzX | Rank: Elite I | UID: 720816370 (4267) | Registered: 2020-06-05T12:10:54.000Z",
+  "marvelinofirmansyah@gmail.com:Yudistira2015 | Level: 28 | Name: THE._.SLAYER | Rank: Grandmaster III | UID: 1280553200 (15204) | Registered: 2022-08-19T08:26:26.000Z",
+  "syafii0319@gmail.com:Geo022 | Level: 18 | Name: Jack__ | Rank: Master IV | UID: 1599735732 (16743) | Registered: 2024-04-02T11:39:24.000Z",
+  "shenalf07@gmail.com:Darken9899 | Level: 5 | Name: Nuwi | Rank: Warrior III | UID: 1376197638 (5400) | Registered: 2023-02-12T09:23:28.000Z",
+  "wisnuarif65@gmail.com:Mandadinda29 | Level: 26 | Name: UranusTikTok | Rank: Epic II | UID: 945266639 (12743) | Registered: 2021-04-10T15:49:14.000Z",
+  "scarletgianna67@gmail.com:Scarletgianna671 | Level: 17 | Name: Worst ling PH. | Rank: Grandmaster I | UID: 1042567203 (11080) | Registered: 2021-08-18T14:35:13.000Z",
+  "gomezroniel29@gmail.com:Azachea2629 | Level: 11 | Name: Ah crot msbrewww | Rank: Grandmaster III | UID: 1423772715 (4426) | Registered: 2023-08-12T11:41:01.000Z",
+  "aizanalif26@gmail.com:Cacing12 | Level: 27 | Name: 大戸アイ | Rank: Legend V | UID: 157731338 (2809) | Registered: 2018-01-22T08:06:16.000Z",
+  "marciodorneles09@gmail.com:Ma99092245 | Level: 25 | Name: Mars | Rank: Grandmaster IV | UID: 520859785 (1226) | Registered: 2019-09-01T01:46:28.000Z",
+  "firedancer026@gmail.com:Jhayjhay26 | Level: 13 | Name: PEMBURU TOBRUTT | Rank: Master III | UID: 1213133907 (11447) | Registered: 2022-04-21T10:48:31.000Z",
+  "meynbibs@gmail.com:Mhaine040993 | Level: 25 | Name: ♥️kisses♥️ | Rank: Grandmaster I | UID: 800909174 (10520) | Registered: 2020-09-18T17:59:03.000Z",
+  "kanjanakedkeerati@gmail.com:Keerati01 | Level: 17 | Name: Purrfectto | Rank: Master I | UID: 1315276999 (15377) | Registered: 2022-10-28T08:36:18.000Z",
+  "luanascheer1@gmail.com:Lu210900 | Level: 14 | Name: Lactobacillus. | Rank: Master IV | UID: 583208277 (1242) | Registered: 2019-12-03T19:05:05.000Z",
+  "gatotkacagg13@gmail.com:Gatotkacaggwp13 | Level: 19 | Name: .GIF | Rank: Grandmaster V | UID: 199422691 (9031) | Registered: 2018-04-05T05:35:20.000Z",
+  "tephgersalia.25@gmail.com:Bp01ry0g | Level: 26 | Name: Pinkypaii | Rank: Grandmaster III | UID: 852866961 (10643) | Registered: 2020-11-28T07:07:44.000Z",
+  "mister.kekcuk@mail.ru:Kekcuk2001 | Level: 19 | Name: ༺Infeͣrnͫal༻ | Rank: Grandmaster V | UID: 498901178 (6045) | Registered: 2019-07-30T20:17:01.000Z",
+  "renesacayjr@gmail.com:Melbourne010721 | Level: 1 | Name:  | Rank: Warrior III | UID: 1761228428 (18517) | Registered: 2024-12-11T05:27:10.000Z",
+  "producoes.tiagopaulino@gmail.com:Tiago090 | Level: 11 | Name: TiagoPx | Rank: Elite III | UID: 708625548 (1279) | Registered: 2020-05-22T05:18:03.000Z",
+  "lucidmaniac93@gmail.com:RememberU93 | Level: 29 | Name: KissMyScythe | Rank: Legend V | UID: 453376595 (6244) | Registered: 2019-05-27T14:38:29.000Z",
+  "rodrogogabrielvg@gmail.com:Vaitomarnocuvaiprocaralho1 | Level: 21 | Name: Van Hellsing | Rank: Master III | UID: 69882595 (1003) | Registered: 2017-06-24T12:38:27.000Z",
+  "crayzigorl@gmail.com:Berke22 | Level: 21 | Name: Hz.YasuonunKılıcı | Rank: Grandmaster III | UID: 225373743 (4051) | Registered: 2018-05-20T05:32:49.000Z",
+  "mohdsolahuddin@gmail.com:Solah5447 | Level: 14 | Name: solahwafi | Rank: Elite I | UID: 779094301 (12108) | Registered: 2020-08-21T04:53:47.000Z",
+  "uucup8129@gmail.com:071002Yusuf | Level: 13 | Name: Xen•Drian | Rank: Master II | UID: 718124930 (8868) | Registered: 2020-06-02T09:19:55.000Z",
+  "mdshahinafik78@gmail.com:Sabrina143 | Level: 15 | Name: K O W E G A T E L | Rank: Master IV | UID: 269843030 (2263) | Registered: 2018-08-05T16:15:52.000Z",
+  "bidinfokomdatmed@gmail.com:GRDhsb08 | Level: 8 | Name: Lumine | Rank: Warrior III | UID: 1081040402 (13326) | Registered: 2021-10-08T18:20:15.000Z",
+  "kaito315199@gmail.com:920131Kaito | Level: 14 | Name: kuroneko92 | Rank: Master II | UID: 1112306466 (13484) | Registered: 2021-11-14T08:42:45.000Z",
+  "piterbueno04@gmail.com:Universal1 | Level: 8 | Name: uchiha.gns | Rank: Warrior I | UID: 899373113 (5293) | Registered: 2021-02-01T15:04:35.000Z",
+  "ricardo.aguilar.alvis10@gmail.com:Arequipa123 | Level: 29 | Name: helaman | Rank: Master I | UID: 1480043617 (1633) | Registered: 2023-08-24T22:05:48.000Z",
+  "redny30@gmail.com:Raed2006 | Level: 8 | Name: Raed@6746 | Rank: Elite II | UID: 1156183251 (4361) | Registered: 2022-01-20T20:37:31.000Z",
+  "meynbibs@gmail.com:Mhaine040993 | Level: 25 | Name: ♥️kisses♥️ | Rank: Grandmaster I | UID: 800909174 (10520) | Registered: 2020-09-18T17:59:03.000Z",
+  "christian.cas.gegf2020@gmail.com:Keancas16 | Level: 28 | Name: CKTv | Rank: Grandmaster IV | UID: 1248792132 (11484) | Registered: 2022-06-19T10:28:38.000Z",
+  "bastianarico18@gmail.com:Bastianarico18 | Level: 23 | Name: Cherin_ | Rank: Grandmaster I | UID: 1467382380 (16123) | Registered: 2023-07-31T07:45:35.000Z",
+  "aflamuz7@gmail.com:Aflamuz32412 | Level: 9 | Name: Erica*2615 | Rank: Warrior I | UID: 1120146131 (13514) | Registered: 2021-11-25T21:01:16.000Z",
+  "chandraananda995@gmail.com:Fairdar1310 | Level: 18 | Name: steeshooo2 | Rank: Grandmaster II | UID: 1046236611 (13207) | Registered: 2021-08-23T15:49:27.000Z",
+  "madunahi77m@eramail.my.id:Bungkus123 | Level: 8 | Name: Saxon.Vicky&2 | Rank: Warrior III | UID: 951878764 (12779) | Registered: 2021-04-19T14:25:08.000Z",
+  "muhammadhsbi10@gmail.com:Pkg954mu16 | Level: 28 | Name: PlSANG KEJU | Rank: Legend II | UID: 1361910538 (15602) | Registered: 2023-01-19T10:05:07.000Z",
+  "bjlgalanggomez15@gmail.com:Beajustine12 | Level: 24 | Name: Méphistopheles | Rank: Legend IV | UID: 317328483 (3622) | Registered: 2018-11-04T05:03:06.000Z",
+  "donghia9901@gmail.com:Nghiakk1234567890 | Level: 16 | Name: W.Jacob~72 | Rank: Warrior III | UID: 390773147 (3811) | Registered: 2019-02-25T02:14:31.000Z",
+  "gondhoady@gmail.com:Djokam354 | Level: 15 | Name: Putri*5480 | Rank: Elite I | UID: 1198203332 (13868) | Registered: 2022-04-06T19:49:11.000Z",
+  "pmvadm266@gmail.com:123Pangkur | Level: 14 | Name: SkyLark | Rank: Master II | UID: 937672851 (12703) | Registered: 2021-03-30T05:27:53.000Z",
+  "hardyanto4097@gmail.com:Hardi1931 | Level: 12 | Name: CLUB_JHRK1 | Rank: Master IV | UID: 579479708 (8323) | Registered: 2019-11-28T13:13:47.000Z",
+  "zekken.jogos@yahoo.com.br:Amor12 | Level: 18 | Name: King™ | Rank: Master III | UID: 361620236 (1030) | Registered: 2019-01-12T00:03:17.000Z",
+  "arkiyasantos07@gmail.com:Kingking23 | Level: 26 | Name: *KING* | Rank: Grandmaster I | UID: 1242913049 (11482) | Registered: 2022-06-08T00:44:26.000Z",
+  "perimuharman@gmail.com:Citanbook123 | Level: 10 | Name: The Rizz | Rank: Elite III | UID: 1218478650 (8753) | Registered: 2022-04-26T15:17:30.000Z",
+  "asridwi2020@gmail.com:Art221122 | Level: 5 | Name: amirah*3443 | Rank: Warrior III | UID: 1348586921 (15412) | Registered: 2022-12-28T04:29:02.000Z",
+  "andhitacahyanie@gmail.com:Andhitacahyanie2268 | Level: 23 | Name: Meowie | Rank: Master I | UID: 1340175713 (15540) | Registered: 2022-12-15T02:58:54.000Z",
+  "perjesjaya@gmail.com:Perjes04 | Level: 9 | Name: Jaya. | Rank: Elite II | UID: 1328933604 (14139) | Registered: 2022-11-24T06:11:37.000Z",
+  "naurawuriyandani016@gmail.com:Adyy077 | Level: 22 | Name: jessy077 | Rank: Grandmaster V | UID: 1445595809 (16031) | Registered: 2023-06-20T13:28:08.000Z",
+  "arkimidon555@gmail.com:Miranda44420936 | Level: 13 | Name: ArKiMiDoN | Rank: Master IV | UID: 1106971923 (1486) | Registered: 2021-11-07T21:00:46.000Z",
+  "achrismast@gmail.com:Aramus86 | Level: 14 | Name: Arcanus | Rank: Master II | UID: 1387050428 (15719) | Registered: 2023-03-03T05:06:07.000Z",
+  "kenpogie15@gmail.com:03Incorrect04 | Level: 20 | Name: ƙѧღḯʂơt̾ | Rank: Grandmaster V | UID: 716493373 (10334) | Registered: 2020-05-31T09:58:55.000Z",
+  "lucianosmamoreira@gmail.com:Luc019283 | Level: 19 | Name: Lucas art | Rank: Grandmaster IV | UID: 972658862 (1407) | Registered: 2021-05-15T19:40:14.000Z",
+  "clinton2062@gmail.com:Clinhitman433 | Level: 14 | Name: clinhitman | Rank: Elite I | UID: 856267408 (4297) | Registered: 2020-12-03T05:04:05.000Z",
+  "raynaldochia.69@gmail.com:189456723zZ | Level: 15 | Name: Chia™ | Rank: Warrior III | UID: 429092511 (9947) | Registered: 2019-04-22T19:06:37.000Z",
+  "titobadang210@gmail.com:Ej042403 | Level: 21 | Name: Zack.. | Rank: Grandmaster III | UID: 704241330 (10293) | Registered: 2020-05-17T05:50:52.000Z",
+  "oquina00@gmail.com:Triskelion123456 | Level: 26 | Name: DetTzy | Rank: Legend V | UID: 1039770637 (11072) | Registered: 2021-08-14T17:18:31.000Z",
+  "yulianawati286@gmail.com:Harbi26080101 | Level: 9 | Name: ਦਾਜਲ. | Rank: Warrior III | UID: 1197975936 (1533) | Registered: 2022-04-06T10:28:41.000Z",
+  "koaza54000@gmail.com:Za0895611285 | Level: 15 | Name: White_x | Rank: Epic V | UID: 1381007105 (15690) | Registered: 2023-02-20T12:42:53.000Z",
+  "atepsumarna1112@gmail.com:Yudis112 | Level: 6 | Name: mamanXmimin | Rank: Warrior III | UID: 1112935046 (13483) | Registered: 2021-11-15T04:00:02.000Z",
+  "rezataufiqwicaksono@gmail.com:Merpati123 | Level: 13 | Name: REZZ | Rank: Grandmaster III | UID: 1301842417 (15301) | Registered: 2022-10-01T16:29:21.000Z",
+  "overlordxyz666@gmail.com:Killz666 | Level: 24 | Name: Naga Kriuk | Rank: Master III | UID: 440136194 (2275) | Registered: 2019-05-09T06:38:03.000Z",
+  "amjadmGIZ@gmail.com:Giz3164581810 | Level: 13 | Name: RoellStore. | Rank: Master IV | UID: 674602264 (6313) | Registered: 2020-04-10T11:18:42.000Z",
+  "thony1933@gmail.com:Tombreng07 | Level: 22 | Name: TONING | Rank: Epic III | UID: 614929772 (8479) | Registered: 2020-01-24T09:17:15.000Z",
+  "anass0099@googlemail.com:Malmal2021 | Level: 5 | Name: Anass9999 | Rank: Warrior III | UID: 1143606554 (6540) | Registered: 2021-12-31T09:57:25.000Z",
+  "emmyaxa@gmail.com:Emmyaxa2010 | Level: 15 | Name: Sorren9710 | Rank: Master III | UID: 1415668229 (15876) | Registered: 2023-04-23T05:36:53.000Z",
+  "wahyuninurul360@gmail.com:14Juni1994 | Level: 21 | Name: azkarayhansaqil09 | Rank: Epic V | UID: 667332479 (8653) | Registered: 2020-03-31T13:46:58.000Z",
+  "ewelinameczynska@gmail.com:Ewelina123 | Level: 28 | Name: EpaEpa | Rank: Grandmaster V | UID: 594099443 (6087) | Registered: 2019-12-18T17:10:06.000Z",
+  "Jansafaat8@gmail.com:1Sampai9 | Level: 22 | Name: Squad_Mood | Rank: Legend V | UID: 1159130739 (13705) | Registered: 2022-01-25T22:27:19.000Z",
+  "aicateodoro4@gmail.com:Aicajeh143 | Level: 16 | Name: ꧁Xiaoxi Chen꧂ | Rank: Master III | UID: 818688954 (10558) | Registered: 2020-10-10T08:51:51.000Z",
+  "denipurwandi1@gmail.com:Arkhan24092010 | Level: 24 | Name: Arkhanputra | Rank: Grandmaster V | UID: 1646642442 (16947) | Registered: 2024-06-17T12:46:02.000Z",
+  "alyaadriana486@gmail.com:Alya2003 | Level: 24 | Name: CHUCKY | Rank: Epic V | UID: 934777956 (12707) | Registered: 2021-03-25T18:33:59.000Z",
+  "zhuran286@gmail.com:Zhuran9 | Level: 5 | Name: Karlsen Hawk~27 | Rank: Warrior III | UID: 1529491440 (16422) | Registered: 2023-12-04T07:36:28.000Z",
+  "irfandarrius@gmail.com:V4n1x096 | Level: 20 | Name: Darriusx60000 | Rank: Master IV | UID: 570486371 (8269) | Registered: 2019-11-16T04:13:06.000Z",
+  "fadhilmubarak033@gmail.com:Fadhilm1202 | Level: 14 | Name: ZinXin | Rank: Master IV | UID: 616462180 (8469) | Registered: 2020-01-18T04:57:45.000Z",
+  "nailakamilaputri24@gmail.com:Nailakamila123 | Level: 16 | Name: N A Y | Rank: Grandmaster IV | UID: 1354619000 (15567) | Registered: 2023-01-06T23:47:31.000Z",
+  "sincapbey74@gmail.com:Nuso14 | Level: 20 | Name: Nusobeyi | Rank: Elite II | UID: 920192117 (4316) | Registered: 2021-03-04T01:30:35.000Z",
+  "hanafi.backupdata@gmail.com:Ikspi1980 | Level: 24 | Name: Han -_- | Rank: Epic V | UID: 565310591 (8265) | Registered: 2019-11-08T05:24:55.000Z",
+  "tomydianpurnama05@gmail.com:dSwitaa67 | Level: 15 | Name: Deon Hart | Rank: Master IV | UID: 1434175001 (15953) | Registered: 2023-05-29T02:52:36.000Z",
+  "aerisxo84@gmail.com:060605Amel | Level: 11 | Name: 재현<3 | Rank: Warrior I | UID: 856670797 (12393) | Registered: 2020-12-03T16:09:51.000Z",
+  "tisousou.2006@gmail.com:Tisousou971 | Level: 23 | Name: slvpoto | Rank: Master III | UID: 584433079 (6071) | Registered: 2019-12-05T18:05:34.000Z",
+  "dariuskwang0@gmail.com:Goldenbli1412 | Level: 29 | Name: ANGELA ХЕНТАЙ | Rank: Legend V | UID: 784071132 (12122) | Registered: 2020-08-27T17:22:12.000Z",
+  "jammagno29@gmail.com:Jammagno1 | Level: 6 | Name: Really Negga? | Rank: Warrior III | UID: 919076221 (10777) | Registered: 2021-03-02T07:02:25.000Z",
+  "medfree328@gmail.com:azerty112345Yy | Level: 11 | Name: .Rock band | Rank: Master IV | UID: 1272538904 (4383) | Registered: 2022-08-03T22:16:57.000Z",
+  "anti73hacker@gmail.com:Uvp65200 | Level: 12 | Name: Psteywa | Rank: Grandmaster IV | UID: 1467354621 (14297) | Registered: 2023-07-31T06:36:24.000Z",
+  "jezreelmark14@gmail.com:JzRlMrK75 | Level: 11 | Name: KAKANGKU STORE | Rank: Elite II | UID: 652321992 (10207) | Registered: 2020-03-11T02:44:28.000Z",
+  "lapheytt@gmail.com:AP4cuy | Level: 16 | Name: Triggerxc | Rank: Grandmaster IV | UID: 1087689855 (5342) | Registered: 2021-10-18T00:49:47.000Z",
+  "roniiherva11@gmail.com:Roniherva12 | Level: 10 | Name: SUGA | Rank: Elite III | UID: 1103930260 (13449) | Registered: 2021-11-05T01:24:10.000Z",
+  "andrezakarolayne750@gmail.com:Ak16052802 | Level: 11 | Name: Andreza.K | Rank: Master III | UID: 1128758121 (1494) | Registered: 2021-12-08T20:21:20.000Z",
+  "fantomdelax006@gmail.com:RaViL6768 | Level: 19 | Name: ᴰᵃʳᵏKNÌGHT | Rank: Epic V | UID: 1562675743 (16573) | Registered: 2024-01-28T15:39:09.000Z",
+  "toyattack27@yahoo.com:Hatdug69 | Level: 11 | Name: \"NYET♤Y\" | Rank: Warrior II | UID: 324216421 (3630) | Registered: 2018-11-16T08:17:03.000Z",
+  "worakandeer28@gmail.com:Deer282539 | Level: 12 | Name: skyDeer | Rank: Elite II | UID: 1539340684 (16450) | Registered: 2023-12-22T02:18:57.000Z",
+  "bryaninetcafe@gmail.com:Tckaetvjbtcj8378 | Level: 23 | Name: mãř§hmâłłøw | Rank: Grandmaster III | UID: 407711634 (3840) | Registered: 2019-03-22T13:55:00.000Z",
+  "Youssefsarioui@gmail.com:Youssef123 | Level: 5 | Name: Thanatos Loyal&92 | Rank: Warrior III | UID: 516887695 (4231) | Registered: 2019-08-26T21:16:57.000Z",
+  "okitakawaii90@gmail.com:Okitakawaii6678 | Level: 26 | Name: Heena Van Astrea. | Rank: Grandmaster V | UID: 1650903573 (16983) | Registered: 2024-06-23T09:05:35.000Z",
+  "jaskx1995@gmail.com:Tenshiohi95 | Level: 20 | Name: Made sigma dikit | Rank: Elite III | UID: 743473689 (5252) | Registered: 2020-07-04T04:34:13.000Z",
+  "spawn.cyber@gmail.com:Spawn160591 | Level: 9 | Name: JK.FAST | Rank: Warrior III | UID: 695343710 (8766) | Registered: 2020-05-06T21:18:47.000Z",
+  "zeqoorestis@gmail.com:Fioraop13 | Level: 21 | Name: JurJurinCut | Country: GR | Rank: Grandmaster IV | UID: 419948353 (6093) | Registered: 2019-04-09T11:27:02.000Z",
+  "drakan.15@hotmail.com:Neoadepa33 | Level: 15 | Name: DrakaN | Country: BR | Rank: Master III | UID: 646730146 (1257) | Registered: 2020-03-02T22:03:36.000Z",
+  "emmanuelchipimorales@gmail.com:Losdaniels1937 | Level: 12 | Name: Shaggy | Country: MX | Rank: Warrior III | UID: 413368800 (5034) | Registered: 2019-03-30T23:31:11.000Z",
+  "im.franklampard@gmail.com:Romeojuliet2 | Level: 12 | Name: patinoza | Country: ID | Rank: Elite III | UID: 612191094 (8450) | Registered: 2020-01-11T14:57:44.000Z",
+  "saasuakeehuchiha@gmail.com:Trollface13 | Level: 19 | Name: P P Q | Country: ar | Rank: Master III | UID: 6692287 (1011) | Registered: 2016-11-02T02:07:36.000Z",
+  "stefanrajcevski@gmail.com:Coolpop123 | Level: 24 | Name: Stone@3123 | Country: MK | Rank: Epic V | UID: 839908019 (6397) | Registered: 2020-11-09T11:45:13.000Z",
+  "veniciussousa391@gmail.com:Ve387125 | Level: 28 | Name: VNC30PRAUM | Country: BR | Rank: Epic V | UID: 661733455 (1262) | Registered: 2020-03-23T13:15:12.000Z",
+  "mfajar_adyatama@yahoo.co.id:Reduskra29 | Level: 16 | Name: Bart4k | Country: ID | Rank: Grandmaster III | UID: 1382568521 (15682) | Registered: 2023-02-23T07:25:22.000Z",
+  "greg.max.grzybu@gmail.com:wartoA774 | Level: 16 | Name: Daria Janice~77 | Country: GB | Rank: Elite II | UID: 621166855 (4041) | Registered: 2020-01-24T23:23:39.000Z",
+  "camiloordenesvargas@gmail.com:Camilocrack123 | Level: 19 | Name: Platanito200 | Country: BO | Rank: Master III | UID: 726894011 (1286) | Registered: 2020-06-13T00:10:47.000Z",
+  "duty.ghost98@gmail.com:Myk879707m | Level: 18 | Name: Luke John | Country: KW | Rank: Grandmaster IV | UID: 1278372090 (6598) | Registered: 2022-08-15T01:30:11.000Z",
+  "kakarott69@gmail.com:Jofemesa69 | Level: 11 | Name: atrapadors | Country: ES | Rank: Master IV | UID: 676457737 (4255) | Registered: 2020-04-12T18:36:34.000Z",
+  "tivenhout@gmail.com:navara25rS | Level: 23 | Name: T1ven | Country: AU | Rank: Grandmaster IV | UID: 384913161 (9751) | Registered: 2019-02-16T11:04:37.000Z",
+  "patrikdupak1@gmail.com:Pata1010 | Level: 12 | Name: Pokky | Country: CZ | Rank: Elite II | UID: 1052264323 (6502) | Registered: 2021-08-31T19:42:08.000Z",
+  "iirfan636@gmail.com:Sakamichi46 | Level: 27 | Name: 賀喜春香 | Country: ID | Rank: Epic II | UID: 745887677 (8984) | Registered: 2020-07-07T05:54:46.000Z",
+  "silvinazarego@gmail.com:Sng41916885 | Level: 21 | Name: Rarenix | Country: AR | Rank: Warrior III | UID: 1631985516 (1691) | Registered: 2024-05-25T18:20:57.000Z",
+  "edwinroplayer@gmail.com:Dinamo1505 | Level: 11 | Name: Deyzx | Country: SE | Rank: Warrior III | UID: 23436120 (6028) | Registered: 2016-12-26T16:45:21.000Z",
+  "afrigopaltras@gmail.com:Gopalsolima99 | Level: 15 | Name: Joyce*3818 | Country: ID | Rank: Master I | UID: 1580106605 (16653) | Registered: 2024-02-28T09:04:29.000Z",
+  "kdinmuhammad@gmail.com:Tokobagus4920 | Level: 21 | Name: DINNID | Country: ID | Rank: Grandmaster V | UID: 108773859 (2543) | Registered: 2017-10-11T13:27:40.000Z",
+  "zkorbut855@gmail.com:Assasen1997 | Level: 20 | Name: Ybiuza | Country: UA | Rank: Master IV | UID: 529060329 (5046) | Registered: 2019-09-12T21:16:17.000Z",
+  "timonko1@azet.sk:Genius9460 | Level: 16 | Name: itachi9460 | Country: SK | Rank: Master II | UID: 257990672 (6235) | Registered: 2019-08-01T16:22:57.000Z",
+  "alimertsak2@icloud.com:Alimert19 | Level: 11 | Name: NQPE | Country: TR | Rank: Warrior III | UID: 110065658 (4208) | Registered: 2017-10-14T21:24:57.000Z",
+  "zajaclukasz3@gmail.com:Luk11Zaj | Level: 11 | Name: CrashedBoy | Country: PL | Rank: Elite III | UID: 689596222 (6331) | Registered: 2020-04-29T18:06:13.000Z",
+  "eduar2008200@gmail.com:Amapolas1 | Level: 16 | Name: MC RT | Country: MX | Rank: Master IV | UID: 295209015 (5045) | Registered: 2018-09-23T00:21:27.000Z",
+  "mychaeldouglas034@gmail.com:Mychael1 | Level: 9 | Name: Hashimoto123 | Country: BR | Rank: Warrior III | UID: 187349264 (1204) | Registered: 2018-03-15T17:40:44.000Z",
+  "lezcanojuancorey@gmail.com:43218008qQ | Level: 27 | Name: pepitosalvaje | Country: AR | Rank: Grandmaster IV | UID: 644024007 (1249) | Registered: 2020-02-28T04:04:18.000Z",
+  "jeremyveldt@gmail.com:Poepen21 | Level: 27 | Name: dtxshawn | Country: NL | Rank: Grandmaster V | UID: 11362779 (4009) | Registered: 2016-11-18T17:15:01.000Z",
+  "amd.dlc98@gmail.com:Naruhina13 | Level: 18 | Name: Eufie | Country: TH | Rank: Master IV | UID: 50201413 (2083) | Registered: 2017-04-19T14:59:05.000Z",
+  "benjaminhusic211@gmail.com:Salata11 | Level: 22 | Name: XnjobeX | Country: BA | Rank: Grandmaster V | UID: 838755807 (6399) | Registered: 2020-11-07T22:42:24.000Z",
+  "leoasspedroso@gmail.com:19042006Leo | Level: 11 | Name: euamoasa | Country: BR | Rank: Elite I | UID: 672043399 (1263) | Registered: 2020-04-07T05:32:25.000Z",
+  "troll.l3g3nd1@gmail.com:Pedrolara1 | Level: 29 | Name: Mamute666 | Country: BR | Rank: Grandmaster V | UID: 188595635 (1046) | Registered: 2018-03-17T15:46:49.000Z",
+  "jasamstora@gmail.com:170296xD | Level: 16 | Name: Conn | Country: BA | Rank: Master I | UID: 492798245 (6040) | Registered: 2019-07-21T08:00:14.000Z",
+  "giampierdelatorre@gmail.com:Marinaok1234 | Level: 14 | Name: danteee33 | Country: PE | Rank: Master III | UID: 413335909 (1049) | Registered: 2019-03-30T21:04:11.000Z",
+  "alax1221@gmail.com:Eragon123 | Level: 16 | Name: 白金之星 | Country: IT | Rank: Elite II | UID: 272791277 (6231) | Registered: 2018-08-11T17:23:59.000Z",
+  "bsapar2003@gmail.com:QWEasw21 | Level: 19 | Name: Болмайды | Country: KZ | Rank: Grandmaster I | UID: 1234510936 (15018) | Registered: 2022-05-22T12:13:55.000Z",
+  "dvdciti@gmail.com:Labarrabaja2 | Level: 27 | Name: dvdciti | Country: ES | Rank: Master IV | UID: 605253891 (4023) | Registered: 2020-01-01T16:34:41.000Z",
+  "hamsyar88@gmail.com:njq1006W | Level: 29 | Name: Los Asbestos | Country: MY | Rank: Epic IV | UID: 60884382 (2215) | Registered: 2017-05-27T23:26:20.000Z",
+  "antonykhamis@gmail.com:Antony08 | Level: 10 | Name: Lostvanny | Country: BR | Rank: Warrior III | UID: 1023068009 (1464) | Registered: 2021-09-27T23:19:05.000Z",
+  "fkaman85@gmail.com:Kaman0184680 | Level: 20 | Name: 😂😂😂 | Country: MY | Rank: Grandmaster V | UID: 38552431 (2060) | Registered: 2017-02-27T11:07:28.000Z",
+  "hakanakkusofficial@gmail.com:Elly0202 | Level: 23 | Name: Rowena34 | Country: TR | Rank: Grandmaster II | UID: 1335788075 (4396) | Registered: 2022-12-07T00:46:30.000Z",
+  "abg417@gmail.com:Adib12345 | Level: 9 | Name: Adm1re | Country: MY | Rank: Warrior II | UID: 1542503537 (16465) | Registered: 2023-12-26T13:54:53.000Z",
+  "govoruhaegor32w@gmail.com:Govoruhaqwe28 | Level: 21 | Name: Eg0rchi228 | Country: UA | Rank: Grandmaster II | UID: 1634694365 (6800) | Registered: 2024-05-30T07:29:50.000Z",
+  "kira22330@gmail.com:Loulou22330 | Level: 11 | Name: Mythique gaming | Country: FR | Rank: Warrior III | UID: 554601714 (6267) | Registered: 2019-10-21T19:01:50.000Z",
+  "maqifitra@gmail.com:Wereteqe47 | Level: 12 | Name: kicik_kicik69 | Country: ID | Rank: Warrior I | UID: 39303325 (2060) | Registered: 2017-03-03T06:03:29.000Z",
+  "dimasoctavian2004@gmail.com:AbahLala12 | Level: 17 | Name: χ∂|σ¢тαиє | Country: ID | Rank: Grandmaster V | UID: 121922256 (2625) | Registered: 2017-11-14T07:11:37.000Z",
+  "samuel23121997@gmail.com:Samsamuel23 | Level: 17 | Name: darksidersam23 | Country: IN | Rank: Master II | UID: 535475991 (8152) | Registered: 2019-09-22T03:03:22.000Z",
+  "lautimono5@gmail.com:Monopolis15 | Level: 20 | Name: ElChurry15 | Country: AR | Rank: Master IV | UID: 777986581 (1309) | Registered: 2020-08-19T13:51:17.000Z",
+  "brandonle2805@gmail.com:Jiale280505 | Level: 14 | Name: ★ Jt | Violet | Country: MY | Rank: Master III | UID: 1377761671 (15655) | Registered: 2023-02-15T08:22:13.000Z",
+  "duva99duva@gmail.com:0303456sD | Level: 18 | Name: The Kin of Mind | Country: AR | Rank: Master IV | UID: 540512315 (1232) | Registered: 2019-09-30T01:23:47.000Z",
+  "shannicedliv@gmail.com:Shannice38 | Level: 28 | Name: CaBun• | Country: ID | Rank: Grandmaster I | UID: 399304758 (9858) | Registered: 2019-03-10T01:05:47.000Z",
+  "dragos.dx_2@yahoo.com:Dragos09 | Level: 19 | Name: El'Patron | Country: RO | Rank: Master II | UID: 626022543 (6210) | Registered: 2020-01-31T21:49:23.000Z",
+  "gkim7784@gmail.com:Kkiimmyo1 | Level: 13 | Name: kimyoyo | Country: TH | Rank: Warrior I | UID: 77947703 (2147) | Registered: 2017-07-17T10:52:28.000Z",
+  "zackron9102@gmail.com:Asima180291 | Level: 14 | Name: MrKino | Country: MY | Rank: Master I | UID: 185285645 (2929) | Registered: 2018-03-11T21:50:51.000Z",
+  "kolindafwarsky@gmail.com:123Iamraven098 | Level: 23 | Name: SiRavenLangTo | Country: US | Rank: Grandmaster I | UID: 1612115076 (5440) | Registered: 2024-04-22T03:51:36.000Z",
+  "annepabion21@gmail.com:Langga1001 | Level: 25 | Name: Awesometepz | Country: PH | Rank: Master IV | UID: 28969242 (3038) | Registered: 2017-01-14T12:43:20.000Z",
+  "arnisa162@gmail.com:Toris123 | Level: 8 | Name: Arnelis | Country: LT | Rank: Elite III | UID: 964632639 (6464) | Registered: 2021-05-06T12:45:37.000Z",
+  "yuri.coelho8149@gmail.com:Cs814993217 | Level: 11 | Name: Yuri8149cs | Country: BR | Rank: Warrior III | UID: 879065883 (1365) | Registered: 2021-01-02T23:48:13.000Z",
+  "phamkhanhhuy1231@gmail.com:Huytehuy147 | Level: 13 | Name: huytehuy2 | Country: VN | Rank: Elite I | UID: 30911497 (3038) | Registered: 2017-01-23T06:07:13.000Z",
+  "mishatelefon13@gmail.com:NoProblem05062001 | Level: 13 | Name: NoProblem0506 | Country: BY | Rank: Master IV | UID: 326185892 (6029) | Registered: 2018-11-19T07:51:57.000Z",
+  "dc.mesana@gmail.com:Mesana234 | Level: 19 | Name: TINAPA|DÆNG | Country: IT | Rank: Grandmaster IV | UID: 250320611 (6222) | Registered: 2018-06-30T18:58:01.000Z",
+  "longacno@gmail.com:Ghjkibht01 | Level: 24 | Name: LQong | Country: VN | Rank: Grandmaster V | UID: 588753160 (10061) | Registered: 2019-12-11T13:39:18.000Z",
+  "iescookiess123@gmail.com:Ies161196 | Level: 14 | Name: kiekhairil | Country: MY | Rank: Elite I | UID: 641795428 (8553) | Registered: 2020-02-24T14:47:09.000Z",
+  "edwardmario123@gmail.com:STM3lugo | Level: 19 | Name: spartanthemac | Country: CO | Rank: Master II | UID: 56439610 (5001) | Registered: 2017-05-13T02:24:03.000Z",
+  "tyerryenry@gmail.com:Martin986 | Level: 23 | Name: ¶™Mistery™¶ | Country: PE | Rank: Legend V | UID: 511878730 (1226) | Registered: 2019-08-19T06:35:50.000Z",
+  "speedybilliesgum@gmail.com:B2228023746j | Level: 12 | Name: BilliesGum | Country: GR | Rank: Warrior III | UID: 758172240 (6360) | Registered: 2020-07-23T16:46:36.000Z",
+  "cyborgsenseibg@gmail.com:Niki08Ares04 | Level: 10 | Name: BoomStarBG | Country: BG | Rank: Warrior II | UID: 265636054 (6226) | Registered: 2018-07-28T12:36:02.000Z",
+  "alexandertu1994@gmail.com:A081794t | Level: 7 | Name: Breezy@6253 | Country: US | Rank: Warrior III | UID: 681851367 (5245) | Registered: 2020-04-19T21:37:19.000Z",
+  "ibamjuki101@gmail.com:Kaeruibam124 | Level: 9 | Name: Soeharto GAMING | Country: ID | Rank: Warrior II | UID: 991789984 (12942) | Registered: 2021-06-10T11:36:16.000Z",
+  "jcmtea168@gmail.com:Asder1280 | Level: 26 | Name: JCmTEA | Country: TW | Rank: Epic V | UID: 39093925 (3209) | Registered: 2017-03-02T04:32:44.000Z",
+  "muntzerahmed338@gmail.com:laithtaha22A | Level: 13 | Name: Muntzer | Country: IQ | Rank: Elite I | UID: 1225897061 (6573) | Registered: 2022-05-06T21:04:02.000Z",
+  "tahaaburak54@hotmail.com:Tbbalturk54 | Level: 22 | Name: TohnnyBravo | Country: TR | Rank: Master II | UID: 86384916 (4017) | Registered: 2017-08-11T16:56:23.000Z",
+  "yonyanus17@gmail.com:Oke779955 | Level: 28 | Name: yonacc25 | Country: ID | Rank: Grandmaster I | UID: 1637507679 (16929) | Registered: 2024-06-03T15:07:51.000Z",
+  "rifdhiuchiha@gmail.com:RifdhiBen10 | Level: 21 | Name: sasuke.uzum | Country: MY | Rank: Grandmaster V | UID: 56223311 (2213) | Registered: 2017-05-12T07:17:39.000Z",
+  "younesskhoutire0667@gmail.com:Madrigal0667 | Level: 11 | Name: leiena | Country: DZ | Rank: Elite I | UID: 832332765 (4292) | Registered: 2020-10-29T19:53:20.000Z",
+  "lianacz@seznam.cz:Ff7408454 | Level: 19 | Name: AngelWolf | Country: CZ | Rank: Elite I | UID: 199707988 (6082) | Registered: 2018-04-05T14:01:24.000Z",
+  "salvatore.gelminno@gmail.com:Lavezzi723 | Level: 16 | Name: SZS. | Country: IT | Rank: Master II | UID: 637510072 (6293) | Registered: 2020-02-18T07:42:38.000Z",
+  "tavinhorobles140@gmail.com:Batatona10 | Level: 15 | Name: CarecaComCabelo | Country: BR | Rank: Elite II | UID: 1246932917 (1542) | Registered: 2022-06-15T21:30:37.000Z",
+  "jerakelq2@gmail.com:Debosh1374 | Level: 27 | Name: Debosh | Country: RU | Rank: Grandmaster V | UID: 567545143 (6274) | Registered: 2019-11-11T08:38:20.000Z",
+  "pandaaaaa7219@gmail.com:SCaRknit7219 | Level: 11 | Name: pANDaaaaa | Country: NP | Rank: Warrior II | UID: 570236996 (8274) | Registered: 2019-11-15T18:01:17.000Z",
+  "ronie.austin88@gmail.com:Roni5688 | Level: 23 | Name: FuzNavGames | Country: BR | Rank: Master I | UID: 407954193 (1042) | Registered: 2019-03-23T01:51:59.000Z",
+  "aprilnikee23@gmail.com:Iceprince098 | Level: 16 | Name: Yono.Judy | Country: SG | Rank: Elite II | UID: 1590693112 (16672) | Registered: 2024-03-18T03:42:41.000Z",
+  "herovats166@gmail.com:Aashu2907 | Level: 23 | Name: Rimuru Tempest | Country: DE | Rank: Epic V | UID: 816821189 (6385) | Registered: 2020-10-07T15:32:47.000Z",
+  "prooplayernumber126@gmail.com:Ruben310705 | Level: 21 | Name: PRY-Rubencito | Country: ES | Rank: Master II | UID: 389173354 (4047) | Registered: 2019-02-22T20:54:17.000Z",
+  "deadstar54321@gmail.com:Deadstargaming54321 | Level: 14 | Name: Elite DeadStar54321 | Country: ID | Rank: Elite III | UID: 164476948 (2835) | Registered: 2018-02-03T12:06:22.000Z",
+  "orgil1241@gmail.com:Sadarfrog1 | Level: 18 | Name: Corsac | Country: MN | Rank: Elite II | UID: 840005100 (10595) | Registered: 2020-11-09T13:57:34.000Z",
+  "choquecaritakedi@gmail.com:EsCabadora1 | Level: 10 | Name: SrManiac | Country: PE | Rank: Elite III | UID: 1075474935 (1467) | Registered: 2021-10-01T14:57:35.000Z",
+  "bubblemuffinpink12@gmail.com:Link12002 | Level: 28 | Name: GrowinElf | Country: US | Rank: Master III | UID: 526754585 (7019) | Registered: 2019-09-09T04:32:45.000Z",
+  "alejo32san@gmail.com:29962326Salas | Level: 21 | Name: THV✓Fores✓ | Country: VE | Rank: Epic V | UID: 1188639931 (1526) | Registered: 2022-03-20T02:59:29.000Z",
+  "ostrystf@gmail.com:Gracek123 | Level: 18 | Name: lisciu | Country: PL | Rank: Master I | UID: 551079220 (6267) | Registered: 2019-10-16T12:33:15.000Z",
+  "emircan4038@gmail.com:Emocan3840 | Level: 9 | Name: BlackDagger | Country: TR | Rank: Elite I | UID: 1128750329 (4355) | Registered: 2021-12-08T19:40:37.000Z",
+  "angmag1991@gmail.com:Maggio1991 | Level: 14 | Name: xMANN VS AI | Country: IT | Rank: Elite II | UID: 850422433 (6402) | Registered: 2020-11-24T15:25:14.000Z",
+  "tubiesky@gmail.com:Gooday123 | Level: 12 | Name: Yassuona | Country: IL | Rank: Elite II | UID: 80095111 (6014) | Registered: 2017-07-23T14:57:45.000Z",
+  "olegipod12364@gmail.com:Dvoe4nik22 | Level: 10 | Name: To4Ka | Country: RU | Rank: Warrior III | UID: 761227447 (6363) | Registered: 2020-07-27T22:16:23.000Z",
+  "joaomtt12@gmail.com:Joao516534 | Level: 12 | Name: JoaoMTT | Country: BR | Rank: Elite III | UID: 87248016 (1203) | Registered: 2017-08-13T23:02:01.000Z",
+  "jankattenberg07@gmail.com:Schelp123 | Level: 15 | Name: Twelve | Country: NL | Rank: Warrior III | UID: 1255799074 (4379) | Registered: 2022-07-02T19:49:45.000Z",
+  "lona.panasuk@gmail.com:sh7A4oxgio | Level: 18 | Name: Meteora | Country: UA | Rank: Master II | UID: 162458532 (6218) | Registered: 2018-01-30T18:53:47.000Z",
+  "mochrazan36@gmail.com:Anggoro10 | Level: 19 | Name: GoldCoast | Country: ID | Rank: Master III | UID: 191071533 (2987) | Registered: 2018-03-22T02:12:53.000Z",
+  "elijahsilver101@gmail.com:Richglo57 | Level: 10 | Name: Elijahsilver101 | Country: US | Rank: Warrior II | UID: 153138522 (5032) | Registered: 2018-01-14T05:03:23.000Z",
+  "joseluissanchezburgos@gmail.com:Josesitoxd12 | Level: 12 | Name: darkneslend | Country: CL | Rank: Elite I | UID: 687249766 (1268) | Registered: 2020-04-26T16:57:35.000Z",
+  "tito11111.com@gmail.com:01277015132aA | Level: 20 | Name: Tito 😎 | Country: EG | Rank: Elite I | UID: 117294476 (6064) | Registered: 2017-11-02T21:28:08.000Z",
+  "cferneyjose@gmail.com:Ferney1102825125 | Level: 12 | Name: Dezzer | Country: CO | Rank: Master IV | UID: 1178960127 (5364) | Registered: 2022-03-02T03:29:38.000Z",
+  "banonlineyt@hotmail.com:Lasanha1515 | Level: 15 | Name: winter∆soldier | Country: BR | Rank: Master IV | UID: 436225605 (1206) | Registered: 2019-05-03T15:02:17.000Z",
+  "atranatejr@hotmail.com:B53d4c8d5A | Level: 25 | Name: blockedhsu | Country: PH | Rank: Grandmaster II | UID: 153327338 (3153) | Registered: 2018-01-14T10:32:11.000Z",
+  "fldhr99@gmail.com:Mm0507266224 | Level: 27 | Name: EpicFl | Country: SA | Rank: Grandmaster III | UID: 599397173 (6092) | Registered: 2019-12-25T11:58:12.000Z",
+  "mzakwan2405@gmail.com:Sirajsuba24 | Level: 21 | Name: BROZACK_24 | Country: MY | Rank: Grandmaster IV | UID: 903386407 (12578) | Registered: 2021-02-07T07:02:52.000Z",
+  "lucasreimer99@web.de:Beratung007 | Level: 19 | Name: HerrBaum | Country: DE | Rank: Grandmaster II | UID: 728255831 (6341) | Registered: 2020-06-14T12:36:21.000Z",
+  "qovidiuq@gmail.com:Ovidiu123 | Level: 15 | Name: eVo.w0w | Country: AT | Rank: Master II | UID: 941271910 (6457) | Registered: 2021-04-04T13:05:16.000Z",
+  "jordan.valdora@gmail.com:Canelle500 | Level: 16 | Name: ShadowLast | Country: be | Rank: Master III | UID: 7173932 (6009) | Registered: 2016-11-03T19:58:17.000Z",
+  "qlfa9090@gmail.com:Ayanelf9090 | Level: 16 | Name: BADNerf | Country: JP | Rank: Master IV | UID: 689137685 (7213) | Registered: 2020-04-29T05:58:00.000Z",
+  "tmbaee000@gmail.com:1245nbrasBNRAs1 | Level: 23 | Name: LV Madara1V1 | Country: IQ | Rank: Grandmaster V | UID: 1423805113 (6676) | Registered: 2023-05-08T01:03:55.000Z",
+  "mhbhanan2011@gmail.com:Haziq2011 | Level: 25 | Name: X tau | Country: MY | Rank: Grandmaster IV | UID: 1445987498 (16029) | Registered: 2023-06-21T10:17:38.000Z",
+  "syahnandevitoo@gmail.com:Devitovito20 | Level: 14 | Name: cyzzi | Country: ID | Rank: Elite I | UID: 504450622 (8033) | Registered: 2019-08-08T13:06:05.000Z",
+  "moderador.diego@gmail.com:Besteira2 | Level: 18 | Name: DanDanNicacio | Country: BR | Rank: Grandmaster V | UID: 148511097 (1041) | Registered: 2018-01-06T01:42:57.000Z",
+  "muratdincer282@gmail.com:01020301Mm | Level: 21 | Name: Murat14 | Country: TR | Rank: Master IV | UID: 46721822 (4023) | Registered: 2017-04-05T16:10:07.000Z",
+  "vladimim312@gmail.com:Lotoman7 | Level: 22 | Name: [uC] RoboGodzilla | Country: DO | Rank: Elite II | UID: 8196294 (5002) | Registered: 2016-11-07T15:27:10.000Z",
+  "diana.gabriela9369@gmail.com:Hernandez125 | Level: 20 | Name: Diana 125Hdz | Country: MX | Rank: Elite II | UID: 672644703 (5242) | Registered: 2020-04-08T02:03:32.000Z",
+  "oashurbayov@gmail.com:Osman2009 | Level: 15 | Name: OmarB | Country: US | Rank: Grandmaster III | UID: 1300496015 (5386) | Registered: 2022-09-29T02:58:25.000Z",
+  "omerknowya@gmail.com:Sare2010 | Level: 7 | Name: ALTAN@3249 | Country: TR | Rank: Warrior III | UID: 1571803706 (4449) | Registered: 2024-02-13T05:07:07.000Z",
+  "itsjasmazing@gmail.com:dR34DFULS464 | Level: 7 | Name: jazuming | Country: PH | Rank: Warrior III | UID: 690518479 (10269) | Registered: 2020-04-30T23:55:22.000Z",
+  "luis_davila79@hotmail.com:Javier79 | Level: 11 | Name: JavierPR79 | Country: US | Rank: Master III | UID: 1416331314 (5407) | Registered: 2023-04-24T08:28:54.000Z",
+  "castaneda.angelojames.89@gmail.com:Jajakate23 | Level: 10 | Name: Yajida | Country: SG | Rank: Elite I | UID: 686053754 (8741) | Registered: 2020-04-25T08:37:58.000Z",
+  "anupchand258@gmail.com:Anup9800 | Level: 9 | Name: anOop | Country: NP | Rank: Warrior III | UID: 1397145647 (15789) | Registered: 2023-03-21T09:49:44.000Z",
+  "ridhohadig10@gmail.com:Ridho987 | Level: 16 | Name: rhadiguna | Country: ID | Rank: Grandmaster IV | UID: 466920991 (2404) | Registered: 2019-06-14T15:05:37.000Z",
+  "qoq_009@hotmail.com:Aek0098765 | Level: 25 | Name: FristZสาEโXด | Country: TH | Rank: Elite I | UID: 8511865 (2009) | Registered: 2016-11-09T07:16:02.000Z",
+  "caiorocha121@hotmail.com:Brincar1 | Level: 24 | Name: DrDestin"
+],
+  [
+  "nattasya78@gmail.com:Faza12345 | Nickname: Mizukage. | Level: 119 | ID: 276530349 | Server: 9447 | Region Country: ID | History Rank: Mythical Honor",
+  "fordlynn28@gmail.com:fordLYN28 | Nickname: admiral_ford | Level: 106 | ID: 510611608 | Server: 3368 | Region Country: PH | History Rank: Mythic",
+  "gmantap158@gmail.com:Reyhan123s | Nickname: (Ryhnekbstn) | Level: 141 | ID: 739235872 | Server: 8955 | Region Country: ID | History Rank: Mythical Honor",
+  "noekh08@gmail.com:123aS678 | Nickname: kacangpolong | Level: 117 | ID: 84586238 | Server: 2164 | Region Country: ID | History Rank: Mythic",
+  "cahyofirli@gmail.com:Cahyo123 | Nickname: berkah | Level: 114 | ID: 331149420 | Server: 9236 | Region Country: ID | History Rank: Mythic",
+  "kinzinho.ms@gmail.com:Kinka1981 | Nickname: Spartan | Level: 180 | ID: 816105682 | Server: 1334 | Region Country: BR | History Rank: Mythic",
+  "excelaldos@gmail.com:Progamer1927 | Nickname: Rexxa | Level: 172 | ID: 308385068 | Server: 3608 | Region Country: PH | History Rank: Mythic",
+  "agungfawwazsamilta@gmail.com:Smlta1104 | Nickname: F A N T A B O Y | Level: 103 | ID: 107235614 | Server: 2640 | Region Country: ID | History Rank: Mythic",
+  "fordlynn28@gmail.com:fordLYN28 | Nickname: admiral_ford | Level: 106 | ID: 510611608 | Server: 3368 | Region Country: PH | History Rank: Mythic",
+  "nattasya78@gmail.com:Faza12345 | Nickname: Mizukage. | Level: 119 | ID: 276530349 | Server: 9447 | Region Country: ID | History Rank: Mythical Honor",
+  "gmantap158@gmail.com:Reyhan123s | Nickname: (Ryhnekbstn) | Level: 141 | ID: 739235872 | Server: 8955 | Region Country: ID | History Rank: Mythical Honor",
+  "cahyofirli@gmail.com:Cahyo123 | Nickname: berkah | Level: 114 | ID: 331149420 | Server: 9236 | Region Country: ID | History Rank: Mythic",
+  "noekh08@gmail.com:123aS678 | Nickname: kacangpolong | Level: 117 | ID: 84586238 | Server: 2164 | Region Country: ID | History Rank: Mythic",
+  "kinzinho.ms@gmail.com:Kinka1981 | Nickname: Spartan | Level: 180 | ID: 816105682 | Server: 1334 | Region Country: BR | History Rank: Mythic",
+  "cibankocai@gmail.com:Tiantian03 | Nickname: Viar✓Fortysix | Level: 123 | ID: 445161259 | Server: 2301 | Region Country: ID | History Rank: Mythic",
+  "rovicladeras13@gmail.com:T4njiro | Nickname: ZOOEy | Level: 134 | ID: 482665766 | Server: 3298 | Region Country: PH | History Rank: Mythical Honor",
+  "free6600diamonds@gmail.com:Gundam2200 | Nickname: ZMT    H | Level: 145 | ID: 315752979 | Server: 9655 | Region Country: MM | History Rank: Mythic",
+  "mrrheng995@gmail.com:Heng1996 | Nickname: Kaizén Lynxiee. | Level: 153 | ID: 105558079 | Server: 3223 | Region Country: KH | History Rank: Mythic",
+  "rjdemonlord82@gmail.com:Rdbadana12 | Nickname: johnny culvert | Level: 117 | ID: 394139781 | Server: 3818 | Region Country: PH | History Rank: Mythic",
+  "rahmaniyusuf96@gmail.com:Ucup123456 | Nickname: Tan Malaka | Level: 109 | ID: 479497159 | Server: 2457 | Region Country: ID | History Rank: Mythic",
+  "ferdikoes.ver@gmail.com:Jakarta22 | Nickname: guesswho | Level: 112 | ID: 70603240 | Server: 2130 | Region Country: ID | History Rank: Mythic",
+  "ainn12333@gmail.com:Nura5410 | Nickname: I N D I Z √ | Level: 117 | ID: 236783981 | Server: 2256 | Region Country: MY | History Rank: Mythical Honor",
+  "phoy.fz@gmail.com:Gago09191284604 | Nickname: Jaldaboath | Level: 109 | ID: 139852235 | Server: 3142 | Region Country: PH | History Rank: Mythical Honor",
+  "excelaldos@gmail.com:Progamer1927 | Nickname: Rexxa | Level: 172 | ID: 308385068 | Server: 3608 | Region Country: PH | History Rank: Mythic",
+  "leiff.laurence@gmail.com:192220285Leiff | Nickname: NUTTERTOOLS | Level: 116 | ID: 8742746 | Server: 3013 | Region Country: PH | History Rank: Mythic",
+  "arnoldvillena0412@gmail.com:Babeko1982 | Nickname: SniperWolf | Level: 122 | ID: 71459858 | Server: 3012 | Region Country: PH | History Rank: Mythic",
+  "ihwanm969@gmail.com:Ihwanxxx123 | Nickname: @$@$@$ | Level: 108 | ID: 207460569 | Server: 9095 | Region Country: ID | History Rank: Mythical Honor",
+  "nhanz_marie@yahoo.com:Abigan082693 | Nickname: Zeus. | Level: 116 | ID: 322470002 | Server: 3003 | Region Country: PH | History Rank: Mythical Honor",
+  "aziz.affid666@gmail.com:Azizaffid666 | Nickname: I Am Fat | Level: 102 | ID: 60005476 | Server: 2103 | Region Country: ID | History Rank: Mythic",
+  "lutfi.yagami2@gmail.com:Lightlawliet1995 | Nickname: herumi | Level: 107 | ID: 84009269 | Server: 2165 | Region Country: ID | History Rank: Mythic",
+  "hartonoe.hadie@gmail.com:C4y4ngiku | Nickname: Koem_paY | Level: 119 | ID: 186229470 | Server: 2966 | Region Country: ID | History Rank: Mythic",
+  "ali.budiman1998@gmail.com:Fajar979 | Nickname: Wyvern᭧ | Level: 109 | ID: 72896320 | Server: 2040 | Region Country: ID | History Rank: Mythic",
+  "agungfawwazsamilta@gmail.com:Smlta1104 | Nickname: F A N T A B O Y | Level: 103 | ID: 107235614 | Server: 2640 | Region Country: ID | History Rank: Mythic",
+  "limkenshin7@gmail.com:Dreadlock10 | Nickname: user1206701480319 | Level: 125 | ID: 670319899 | Server: 10234 | Region Country: PH | History Rank: Mythical Honor",
+  "kgbotigan@gmail.com:BEPlop16 | Nickname: ᴋɢシ | Level: 114 | ID: 251191835 | Server: 3541 | Region Country: PH | History Rank: Mythic",
+  "kusumahqia@gmail.com:Okka011081 | Nickname: Syauqia | Level: 134 | ID: 714453560 | Server: 8854 | Region Country: ID | History Rank: Mythic",
+  "mhbsnidsign@gmail.com:Bekaje258 | Nickname: (Computer)2 | Level: 107 | ID: 1019990493 | Server: 13093 | Region Country: ID | History Rank: Mythic",
+  "rickyespiritua1997@gmail.com:Rae09498566213 | Nickname: dustan | Level: 155 | ID: 539585415 | Server: 3436 | Region Country: PH | History Rank: Mythic",
+  "benbarragedragon@gmail.com:Genx8590 | Nickname: 麻宮アテナ | Level: 105 | ID: 288390988 | Server: 9489 | Region Country: ID | History Rank: Mythic",
+  "rodriohara05@gmail.com:R120121r | Nickname: Takashinhu. | Level: 158 | ID: 359730960 | Server: 1033 | Region Country: BR | History Rank: Mythical Honor",
+  "vanessa.avelin29@gmail.com:Tanjung123 | Nickname: —xelz. | Level: 106 | ID: 188530270 | Server: 2959 | Region Country: ID | History Rank: Mythical Honor",
+  "jayfury1119@gmail.com:Kimchin021215 | Nickname: TÂKBÖ MGÂ BÜGÖK | Level: 112 | ID: 113915846 | Server: 3117 | Region Country: PH | History Rank: Mythic",
+  "sitoralitempel8@gmail.com:Perumnas2Bekasi | Nickname: ip.ip ✓ | Level: 143 | ID: 133361706 | Server: 2667 | Region Country: ID | History Rank: Mythic",
+  "eslobak111222@gmail.com:Bb979899 | Nickname: Super Zennn | Level: 107 | ID: 542251932 | Server: 3432 | Region Country: KH | History Rank: Mythic",
+  "Zaidulhaq@yahoo.com:Anajiddan21 | Nickname: auff | Level: 125 | ID: 101939095 | Server: 2527 | Region Country: ID | History Rank: Mythic",
+  "riverarhendel22@gmail.com:Fatima031018 | Nickname: Troy isn't scared | Level: 136 | ID: 326036472 | Server: 3637 | Region Country: PH | History Rank: Mythic",
+  "jlobinjang4@gmail.com:Fuckyourself360 | Nickname: Jed360 | Level: 122 | ID: 650447539 | Server: 8594 | Region Country: MY | History Rank: Mythic",
+  "alfianredzkyb@gmail.com:24September2003 | Nickname: Cıκκııøøツ | Level: 106 | ID: 85144260 | Server: 2167 | Region Country: ID | History Rank: Mythic",
+  "zerostrix9@gmail.com:Fats112 | Nickname: Yuki. | Level: 137 | ID: 342598224 | Server: 3671 | Region Country: PH | History Rank: Mythic",
+  "erlanggawicaksono900@gmail.com:Pajaresuk03 | Nickname: ERSIX9 | Level: 104 | ID: 815626064 | Server: 12239 | Region Country: ID | History Rank: Mythic",
+  "elinakhumancheirakpam1998@gmail.com:khAelina98 | Nickname: ㊣|•Eᴍɪʟɪᴀ | Level: 187 | ID: 90067741 | Server: 2182 | Region Country: IN | History Rank: Mythical Honor",
+  "pangestu5000@gmail.com:Bungjack007 | Nickname: NEERO | Level: 112 | ID: 147954328 | Server: 2746 | Region Country: ID | History Rank: Mythic",
+  "jayfury1119@gmail.com:Kimchin021215 | Nickname: TÂKBÖ MGÂ BÜGÖK | Level: 112 | ID: 113915846 | Server: 3117 | Region Country: PH | History Rank: Mythic",
+  "stok76123@gmail.com:Bintangzza12345 | Nickname: Xc-Albaneee_* | Level: 142 | ID: 859858111 | Server: 12412 | Region Country: MM | History Rank: Mythical Honor",
+  "vthapa004@gmail.com:Appymiss1 | Nickname: DANNY DOG | Level: 105 | ID: 114338372 | Server: 2232 | Region Country: IN | History Rank: Mythic",
+  "Khairulfajri005@gmail.com:Amatir96 | Nickname: Jó L Salvadòr | Level: 134 | ID: 84032071 | Server: 2160 | Region Country: ID | History Rank: Mythic",
+  "rayden0513@gmail.com:Najito101324 | Nickname: ʀᴀʏᴅᴇɴ | Level: 117 | ID: 273683005 | Server: 3557 | Region Country: PH | History Rank: Mythic",
+  "stoktaka6@gmail.com:Fathir200712 | Nickname: Theron | Level: 110 | ID: 131612856 | Server: 2672 | Region Country: ID | History Rank: Mythic",
+  "haidarpm05@gmail.com:Haik44244455 | Nickname: Numbers-813 | Level: 133 | ID: 150934721 | Server: 2761 | Region Country: ID | History Rank: Mythical Honor",
+  "ivanderdarantinao@gmail.com:Palanggako08 | Nickname: Kᴀᴍɪⁿᴀʀɪ | Level: 100 | ID: 446023006 | Server: 3961 | Region Country: PH | History Rank: Mythic",
+  "maxwell.richards12@gmail.com:Moonton1999 | Nickname: why me:'( nooooooo!! | Level: 122 | ID: 622048835 | Server: 5235 | Region Country: TT | History Rank: Legend I",
+  "jhonstivensfreire@gmail.com:D97021712330a | Nickname: Siuuuuuuuu. | Level: 109 | ID: 650892717 | Server: 5247 | Region Country: CO | History Rank: Mythic",
+  "hazelanjohn92@gmail.com:lan6372XH | Nickname: Acaii | Level: 120 | ID: 501250987 | Server: 3331 | Region Country: PH | History Rank: Mythic",
+  "yogiyogaswara.id@gmail.com:Akakak12 | Nickname: Giani | Level: 103 | ID: 728396613 | Server: 8914 | Region Country: ID | History Rank: Mythic",
+  "mjherrera111@gmail.com:MarkJoshua123 | Nickname: Dɪsᴄɪᴘʟᴇツ | Level: 118 | ID: 497257862 | Server: 3346 | Region Country: PH | History Rank: Mythic",
+  "yusufw14082001@gmail.com:Ch14082001 | Nickname: (CH) | Level: 138 | ID: 654265507 | Server: 8604 | Region Country: ID | History Rank: Mythic",
+  "milazahra830@gmail.com:Tommy123 | Nickname: PandoraActor | Level: 121 | ID: 506862872 | Server: 8025 | Region Country: ID | History Rank: Mythic",
+  "muharamkrismawanto@gmail.com:Jakarta48 | Nickname: Skipper | Level: 103 | ID: 75459596 | Server: 2140 | Region Country: ID | History Rank: Mythic",
+  "diveinfire@gmail.com:Hafiz6023 | Nickname: ~PiTTkiNg~ | Level: 128 | ID: 81339444 | Server: 2218 | Region Country: MY | History Rank: Mythic",
+  "rialoerike@gmail.com:Febiandra231184 | Nickname: ᴺᴼメ•ᴿL팀 | Level: 119 | ID: 84387340 | Server: 2163 | Region Country: ID | History Rank: Mythical Honor",
+  "Ujangyaman22@gmail.com:Volleyball22 | Nickname: | Chen Ŧheng 爱 | Level: 104 | ID: 181491777 | Server: 2925 | Region Country: ID | History Rank: Mythic",
+  "Soulman403@gmail.com:Farahuma1 | Nickname: ꜱᴇʀɪᴏᴜꜱ | Level: 102 | ID: 224460101 | Server: 3515 | Region Country: PH | History Rank: Mythic",
+  "fernanmaloy78@yahoo.com:Maloy1978800109 | Nickname: The king Warrior | Level: 112 | ID: 311030174 | Server: 3614 | Region Country: PH | History Rank: Mythic",
+  "watu.bajol01@gmail.com:Watu00 | Nickname: WhaTtu | Level: 138 | ID: 325902047 | Server: 9119 | Region Country: ID | History Rank: Mythic",
+  "Teddidwiasmara@gmail.com:Komikhentai17 | Nickname: Xogen So Gewd :3 | Level: 100 | ID: 186394763 | Server: 9028 | Region Country: ID | History Rank: Mythic",
+  "anjimmelhek@gmail.com:Badut12345 | Nickname: MAMA MA DOLAY | Level: 118 | ID: 263643437 | Server: 2260 | Region Country: ID | History Rank: Mythic",
+  "yumnanaufal107@gmail.com:Yumna107 | Nickname: Liaa. | Level: 123 | ID: 39885246 | Server: 2060 | Region Country: ID | History Rank: Mythical Honor",
+  "adiawan0608@gmail.com:Awan1234 | Nickname: hcked1234 | Level: 145 | ID: 159132179 | Server: 2824 | Region Country: ID | History Rank: Mythical Honor",
+  "ndaktauden1@gmail.com:Anakjakarta03 | Nickname: Shuraa | Level: 114 | ID: 234117581 | Server: 9231 | Region Country: ID | History Rank: Mythic",
+  "markusrenaldy57@gmail.com:Tuhanallah01 | Nickname: A Z I E L | Level: 133 | ID: 91941406 | Server: 2191 | Region Country: ID | History Rank: Mythic",
+  "jabe60300@gmail.com:Install112211 | Nickname: Jinx | Level: 105 | ID: 156566143 | Server: 3160 | Region Country: PH | History Rank: Mythical Glory",
+  "clarkarcon@gmail.com:Clarki12345 | Nickname: Clarkiee | Level: 101 | ID: 321545283 | Server: 3634 | Region Country: PH | History Rank: Mythic",
+  "firdauspratamasantoso15@gmail.com:Andromaxm3y | Nickname: iyy akurùsafo. | Level: 128 | ID: 708758931 | Server: 8827 | Region Country: ID | History Rank: Mythic",
+  "pipzchris@gmail.com:Pipoy123 | Nickname: ピポイ | Level: 110 | ID: 155979586 | Server: 3157 | Region Country: PH | History Rank: Mythic",
+  "myfaithnv@gmail.com:Nick135045 | Nickname: Leclercc | Level: 111 | ID: 55086754 | Server: 2092 | Region Country: MY | History Rank: Mythic",
+  "moeh.gazette@gmail.com:Muhasakibara305 | Nickname: Zhi_Sosial | Level: 109 | ID: 121275821 | Server: 2617 | Region Country: ID | History Rank: Mythic",
+  "hoemhay0@gmail.com:Syahrian12 | Nickname: hoemhay69 | Level: 108 | ID: 739008419 | Server: 8954 | Region Country: ID | History Rank: Mythic",
+  "nashthedesigner@gmail.com:Imm0rtal | Nickname: SH▶️NO TV | Level: 107 | ID: 489422079 | Server: 3307 | Region Country: PH | History Rank: Mythic",
+  "ramlirashid88@gmail.com:Axslay2d | Nickname: Cboi D Roger | Level: 163 | ID: 80588716 | Server: 2154 | Region Country: MY | History Rank: Mythic",
+  "supardi178@gmail.com:Rupit678 | Nickname: iBoo | Level: 106 | ID: 18046613 | Server: 3023 | Region Country: PH | History Rank: Mythic",
+  "christianoandromeda98@gmail.com:Ezaa1305 | Nickname: Eza el guerrero. | Level: 127 | ID: 357818172 | Server: 9618 | Region Country: ID | History Rank: Mythical Glory"
+],
+  ["akun_gen_4 | Nickname: Hero | Level: 70 | ID: 123456789 | Server: 1122 | Region Country: ID | History Rank: Mythic | Banned: False | Last Login: 2025-06-01 | Last Login Country: id | Location: Indonesia | Skin: 99"]
+];
+
+function loadUsers(){ return JSON.parse(localStorage.getItem(USERS_KEY)||'{}'); }
+function saveUsers(obj){ localStorage.setItem(USERS_KEY, JSON.stringify(obj)); }
+(function ensureAdmin(){ const u=loadUsers(); if(!u.admin){u.admin={pass:'admin',coin:999,vip:true}; saveUsers(u);} })();
+
+function setupAuth(){
+  const loginForm = document.getElementById('loginForm');
+  const registerForm = document.getElementById('registerForm');
+  document.getElementById('showRegister').onclick = e => { e.preventDefault(); loginForm.classList.add('hidden'); registerForm.classList.remove('hidden'); };
+  document.getElementById('showLogin').onclick = e => { e.preventDefault(); registerForm.classList.add('hidden'); loginForm.classList.remove('hidden'); };
+
+  document.getElementById('loginBtn').onclick = () => {
+    const u = document.getElementById('loginUser').value.trim();
+    const p = document.getElementById('loginPass').value;
+    const users = loadUsers();
+    if(users[u] && users[u].pass === p){
+      currentUser = users[u]; currentUsername = u;
+      document.getElementById('authBox').classList.add('hidden');
+      document.getElementById('generators').classList.remove('hidden');
+      document.getElementById('checkerContainer').classList.remove('hidden');
+      updateCoinInfo();
+      initGenerators();
+      if (currentUser.vip) document.getElementById('vipBox').classList.remove('hidden');
+      document.getElementById('checkerFullInfo').classList.remove('hidden');
+      buatCaptchaBaru();
+    } else {
+      document.getElementById('loginErr').classList.remove('hidden');
+    }
+  };
+
+  document.getElementById('regBtn').onclick = () => {
+    const u = document.getElementById('regUser').value.trim();
+    const p = document.getElementById('regPass').value;
+    if(!u||!p) return;
+    const users = loadUsers();
+    if(users[u]){
+      document.getElementById('regErr').classList.remove('hidden');
+      document.getElementById('regSuccess').classList.add('hidden');
+    } else {
+      users[u] = { pass: p, coin: START_COIN, vip: true}; saveUsers(users);
+      document.getElementById('regErr').classList.add('hidden');
+      document.getElementById('regSuccess').classList.remove('hidden');
+    }
+  };
+}
+
+function updateCoinInfo() {
+  document.getElementById('coinInfo').innerHTML = `🪙 Coin: ${currentUser.coin} (Login: <strong>${currentUsername}</strong>)`;
+}
+
+function initGenerators(){
+  const container = document.getElementById('generators');
+  container.innerHTML = '';
+  accountsSets.forEach((accounts, i) => {
+    const num = i + 1;
+    const cost = num === 3 ? 3 : COST_PER_GEN;
+    const label = num === 1 ? "Generator 1 (90 to 100)" :
+                  num === 2 ? "Generator 2 (below 80)" :
+                  num === 3 ? "Generator 3 (above 100)" :
+                              "Generator 4 (info skin)";
+    const box = document.createElement('div');
+    box.className = 'bg-red-800 p-4 rounded shadow';
+    box.innerHTML = `
+      <h2 class="text-xl font-semibold mb-2 text-center">${label}</h2>
+      <button id="btn${num}" class="w-full py-2 mb-2 rounded bg-white text-red-700 hover:bg-gray-200">Generate (-${cost} coin)</button>
+      <div id="data${num}" class="mt-2 italic text-center">Data akun: -</div>`;
+    container.appendChild(box);
+    attachGenerator(num, accounts, cost);
+  });
+}
+
+function attachGenerator(num, accounts, cost){
+  const btn = document.getElementById(`btn${num}`);
+  const display = document.getElementById(`data${num}`);
+  btn.onclick = () => {
+    if(currentUser.coin < cost){ alert('Coin anda tidak cukup!'); return; }
+    if(accounts.length === 0){ display.textContent = 'Tidak ada akun tersisa.'; return; }
+    currentUser.coin -= cost;
+    const users = loadUsers(); users[currentUsername] = currentUser; saveUsers(users);
+    updateCoinInfo();
+    const raw = accounts.shift();
+    if (num === 4) {
+      const [emailPass, ...info] = raw.split("|").map(x => x.trim());
+      const details = info.reduce((acc, item) => {
+        const [k,v] = item.split(":"); if(k&&v) acc[k.trim()] = v.trim(); return acc;
+      }, {});
+      display.innerHTML = `<div class='text-left'>
+        <p><strong>Login:</strong> ${emailPass}</p>
+        <p><strong>Nickname:</strong> ${details['Nickname'] || '-'}</p>
+        <p><strong>Level:</strong> ${details['Level'] || '-'}</p>
+        <p><strong>ID:</strong> ${details['ID'] || '-'}</p>
+        <p><strong>Server:</strong> ${details['Server'] || '-'}</p>
+        <p><strong>Region Country:</strong> ${details['Region Country'] || '-'}</p>
+        <p><strong>History Rank:</strong> ${details['History Rank'] || '-'}</p>
+        <p><strong>Banned:</strong> ${details['Banned'] || '-'}</p>
+        <p><strong>Last Login:</strong> ${details['Last Login'] || '-'}</p>
+        <p><strong>Last Login Country:</strong> ${details['Last Login Country'] || '-'}</p>
+        <p><strong>Location:</strong> ${details['Location'] || '-'}</p>
+        <p><strong>Skin:</strong> ${details['Skin'] || '-'}</p>
+      </div>`;
+    } else {
+      display.textContent = 'Data akun: ' + raw;
+    }
+  };
+}
+
+function validasiAkun() {
+  const btn = document.querySelector('button[onclick="validasiAkun()"]');
+  const input = document.getElementById('akunInput').value.trim().split('\n');
+  const output = document.getElementById('hasilValidasi');
+  output.innerHTML = '';
+
+  if (btn.disabled) return;
+  if (currentUser.coin < 20) return alert("Coin tidak cukup!");
+
+  currentUser.coin -= 20;
+  const users = loadUsers(); users[currentUsername] = currentUser; saveUsers(users);
+  updateCoinInfo();
+
+  input.forEach(row => {
+    if (!row.includes(':')) return;
+    const [email, pass] = row.split(':');
+    const isValid = Math.random() > 0.3;
+    const result = document.createElement('div');
+    result.innerHTML = `<span>${email}:${pass}</span> <span class="${isValid ? 'text-green-400' : 'text-red-400'} font-bold">${isValid ? 'Valid ✅' : 'Invalid ❌'}</span>`;
+    output.appendChild(result);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', setupAuth);
+
+function cekFullInfo() {
+  const kode = document.getElementById('captchaCode').textContent.trim();
+  const jawaban = document.getElementById('captchaInput').value.trim();
+  if (jawaban !== kode) {
+    alert("Captcha salah. Silakan ketik ulang dengan benar.");
+    return;
+  }
+
+  const btn = document.querySelector('button[onclick="cekFullInfo()"]');
+  const input = document.getElementById('akunFullInput').value.trim().split('\n');
+  const output = document.getElementById('hasilFullInfo');
+  output.innerHTML = '';
+
+  if (btn.disabled) return;
+  if (currentUser.coin < 20) return alert("Coin tidak cukup!");
+
+  currentUser.coin -= 20;
+  const users = loadUsers(); users[currentUsername] = currentUser; saveUsers(users);
+  updateCoinInfo();
+
+  input.forEach(row => {
+    if (!row.includes(':')) return;
+    const [email, pass] = row.split(':');
+    const result = document.createElement('div');
+    result.innerHTML = `
+      <span class="break-words font-bold text-yellow-300">${email}:${pass}</span><br>
+      Nickname: RandomHero<br>
+      Level: ${Math.floor(Math.random() * 100) + 1}<br>
+      Rank: Mythic ${Math.floor(Math.random() * 50)}★<br>
+      Skin: ${Math.floor(Math.random() * 200)}<br>
+      ID: ${Math.floor(Math.random() * 900000000 + 100000000)}<br>Last Login: 2025-06-${String(Math.floor(Math.random() * 28 + 1)).padStart(2, '0')} 18:00:00 WIB
+    `;
+    output.appendChild(result);
+  });
+
+  let cooldown = 30;
+  btn.disabled = true;
+  const origText = btn.textContent;
+  const timer = setInterval(() => {
+    if (cooldown <= 0) { clearInterval(timer); btn.disabled = false; btn.textContent = origText; }
+    else { btn.textContent = `Cooldown ${cooldown--}s`; }
+  }, 1000);
+}
+
+
+function buatCaptchaBaru() {
+  const captcha = Math.random().toString(36).substring(2, 8).toUpperCase();
+  document.getElementById("captchaCode").textContent = captcha;
+}
+
+</script>
+</body>
+</html>
